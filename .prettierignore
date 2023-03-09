@@ -1,0 +1,8 @@
+dist/**
+coverage/**
+node_modules/**
+src/_locales/**
+src/vendor/**
+
+package.json
+package-lock.json

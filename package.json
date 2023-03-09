@@ -1,0 +1,55 @@
+{
+  "name": "plugin-loader",
+  "version": "1.0.0",
+  "description": "extension that loads declarative plugins",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "buildts": "tsc --project tsconfig.connectors.json",
+    "test": "vitest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yayuyokitano/plugin-loader.git"
+  },
+  "author": "yayuyokitano",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yayuyokitano/plugin-loader/issues"
+  },
+  "homepage": "https://github.com/yayuyokitano/plugin-loader#readme",
+  "dependencies": {
+    "blueimp-md5": "^2.19.0",
+    "metadata-filter": "^1.1.1",
+    "vite": "^4.1.4",
+    "webextension-polyfill": "^0.10.0"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^2.0.0-beta.14",
+    "@types/blueimp-md5": "^2.18.0",
+    "@types/fs-extra": "^11.0.1",
+    "@types/node": "^18.14.6",
+    "@types/webextension-polyfill": "^0.10.0",
+    "@typescript-eslint/eslint-plugin": "^5.54.1",
+    "eslint": "^8.35.0",
+    "eslint-config-web-scrobbler": "^2.1.1",
+    "eslint-plugin-tsdoc": "^0.2.17",
+    "fs-extra": "^11.1.0",
+    "prettier": "^2.8.4",
+    "prettier-config-web-scrobbler": "^0.1.0",
+    "remark-preset-lint-recommended": "^6.1.2",
+    "stylelint": "^13.13.1",
+    "stylelint-config-web-scrobbler": "^0.2.0",
+    "typescript": "^4.9.5"
+  },
+  "prettier": "prettier-config-web-scrobbler",
+  "remark": {
+    "plugins": [
+      "remark-preset-lint-recommended"
+    ]
+  },
+  "stylelint": {
+    "extends": "stylelint-config-web-scrobbler"
+  }
+}
