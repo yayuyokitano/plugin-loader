@@ -4,6 +4,8 @@ import pkg from './package.json';
 export default <ManifestV3Export>{
 	manifest_version: 3,
 	name: 'Plugin Loader',
+	default_locale: 'en',
+	description: '__MSG_extDescription__',
 	version: pkg.version,
 	permissions: ['scripting', 'storage'],
 	host_permissions: ['http://*/', 'https://*/'],
@@ -22,4 +24,13 @@ export default <ManifestV3Export>{
 			matches: ['<all_urls>'],
 		},
 	],
+
+	action: {
+		default_icon: {
+			'19': 'src/icons/page_action_unsupported_19.png',
+			'38': 'src/icons/page_action_unsupported_38.png',
+		},
+		default_title: '__MSG_pageActionUnsupported__',
+		default_popup: 'src/ui/popup/index.html',
+	},
 };

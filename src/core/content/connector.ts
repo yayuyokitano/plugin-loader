@@ -3,7 +3,7 @@ import browser from 'webextension-polyfill';
 import { ArtistTrackInfo, BaseState, State, TimeInfo } from '@/core/types';
 import * as Util from '@/core/content/util';
 
-export default class Connector {
+export default class BaseConnector {
 	/**
 	 * Selector of an element containing artist name.
 	 *
@@ -405,7 +405,7 @@ export default class Connector {
 		const scriptUrl = browser.runtime.getURL(scriptFile);
 		Util.injectScriptIntoDocument(scriptUrl);
 
-		console.log(`Web Scrobbler: Injected ${scriptFile}`);
+		Util.debugLog(`Injected ${scriptFile}`);
 
 		window.addEventListener(
 			'message',
@@ -524,9 +524,9 @@ export default class Connector {
 	private isStateReset = false;
 
 	/**
-	 * Callback set by the reactor to listen on state changes of this connector.
+	 * Callback set by the controller to listen on state changes of this connector.
 	 */
-	public reactorCallback:
+	public controllerCallback:
 		| ((state: State, fields: (keyof State)[]) => void)
 		| null = null;
 
@@ -615,8 +615,8 @@ export default class Connector {
 				return;
 			}
 
-			if (this.reactorCallback !== null) {
-				this.reactorCallback(
+			if (this.controllerCallback !== null) {
+				this.controllerCallback(
 					{},
 					Object.keys(this.defaultState) as (keyof State)[]
 				);
@@ -678,8 +678,8 @@ export default class Connector {
 			if (changedFields.length > 0) {
 				this.filterState(changedFields);
 
-				if (this.reactorCallback !== null) {
-					this.reactorCallback(this.filteredState, changedFields);
+				if (this.controllerCallback !== null) {
+					this.controllerCallback(this.filteredState, changedFields);
 				}
 
 				// @ifdef DEBUG

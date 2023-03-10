@@ -1,7 +1,12 @@
 import { defineConfig } from 'vite';
 import { crx } from '@crxjs/vite-plugin';
 import manifest from './manifest.config';
+import solid from 'vite-plugin-solid';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 import compileConnectors from './scripts/compile-connectors';
+import { resolve } from 'path';
+
+const root = resolve(__dirname, 'src');
 
 export default defineConfig({
 	resolve: {
@@ -13,5 +18,17 @@ export default defineConfig({
 	build: {
 		minify: false,
 	},
-	plugins: [crx({ manifest }), compileConnectors()],
+	plugins: [
+		solid(),
+		crx({ manifest }),
+		compileConnectors(),
+		viteStaticCopy({
+			targets: [
+				{
+					src: resolve(root, '_locales'),
+					dest: '',
+				},
+			],
+		}),
+	],
 });

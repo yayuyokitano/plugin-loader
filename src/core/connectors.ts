@@ -8,10 +8,10 @@ export interface ConnectorMeta {
 
 export default <ConnectorMeta[]>[
 	{
-		label: 'Connector 1',
+		label: 'YouTube',
 		matches: ['*://www.youtube.com/*'],
 		js: 'youtube.js',
-		id: 'connector-1',
+		id: 'youtube',
 	},
 	{
 		label: 'Connector 2',

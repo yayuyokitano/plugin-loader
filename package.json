@@ -30,6 +30,7 @@
     "@types/blueimp-md5": "^2.18.0",
     "@types/fs-extra": "^11.0.1",
     "@types/node": "^18.14.6",
+    "@types/react": "^18.0.28",
     "@types/webextension-polyfill": "^0.10.0",
     "@typescript-eslint/eslint-plugin": "^5.54.1",
     "eslint": "^8.35.0",
@@ -39,9 +40,13 @@
     "prettier": "^2.8.4",
     "prettier-config-web-scrobbler": "^0.1.0",
     "remark-preset-lint-recommended": "^6.1.2",
+    "sass": "^1.58.3",
+    "solid-js": "^1.6.13",
     "stylelint": "^13.13.1",
     "stylelint-config-web-scrobbler": "^0.2.0",
-    "typescript": "^4.9.5"
+    "typescript": "^4.9.5",
+    "vite-plugin-solid": "^2.6.1",
+    "vite-plugin-static-copy": "^0.13.1"
   },
   "prettier": "prettier-config-web-scrobbler",
   "remark": {
