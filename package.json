@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/yayuyokitano/plugin-loader#readme",
   "dependencies": {
+    "@suid/icons-material": "^0.5.9",
     "blueimp-md5": "^2.19.0",
     "metadata-filter": "^1.1.1",
     "vite": "^4.1.4",

@@ -1,10 +1,13 @@
 import { render } from "solid-js/web";
 import styles from "./popup.module.scss";
+import Unsupported from "./unsupported";
+import { initializeThemes } from "@/theme/themes";
+import "@/theme/themes.scss";
 
 function Popup() {
 	return (
-		<div class="popup">
-			<h1 class={styles.header}>Hello World</h1>
+		<div class={styles.popup}>
+			<Unsupported />
 		</div>
 	)
 }
@@ -14,3 +17,4 @@ if (!root) {
 	throw new Error("Root element not found");
 }
 render(Popup, root);
+void initializeThemes();

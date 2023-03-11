@@ -1,0 +1,20 @@
+$themes: (
+	light: (
+		background: #fff,
+		text: #222,
+		last-fm: #d82323,
+	),
+	dark: (
+		background: #1e1e1e,
+		text: #eee,
+		last-fm: #fc3434,
+	),
+);
+
+@each $name, $map in $themes {
+	.theme-#{$name} {
+		@each $key, $value in $map {
+			--#{$key}: #{$value};
+		}
+	}
+}

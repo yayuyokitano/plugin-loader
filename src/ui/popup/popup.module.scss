@@ -1,3 +1,28 @@
-.header {
-	color: red;
+.alertPopup {
+	text-align: center;
+
+	p {
+		text-align: left;
+	}
+}
+
+.bigIcon:not(table) {
+	font-size: 64px;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+}
+
+a {
+	color: var(--last-fm);
+	text-decoration: none;
+}
+
+.popup {
+	background-color: var(--background);
+	color: var(--text);
+	padding: 15px;
+	width: 300px;
 }

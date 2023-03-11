@@ -33,4 +33,8 @@ export default <ManifestV3Export>{
 		default_title: '__MSG_pageActionUnsupported__',
 		default_popup: 'src/ui/popup/index.html',
 	},
+
+	background: {
+		service_worker: 'src/background/main',
+	},
 };
