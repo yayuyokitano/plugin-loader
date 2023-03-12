@@ -3,7 +3,7 @@
  * on pageload, this starter is needed for connectors to start running
  */
 
-import Controller from '@/core/content/controller';
+import Controller from '@/core/content/reactor';
 import BaseConnector from './connector';
 
 export default function start() {

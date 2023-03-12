@@ -69,6 +69,11 @@ export const LOCAL_CACHE = 'LocalCache';
 export const OPTIONS = 'Options';
 
 /**
+ * This storage contains state management information for service worker
+ */
+export const STATE_MANAGEMENT = 'StateManagement';
+
+/**
  * This storage contains the data saved and used by the extension core.
  * The format of storage data is following:
  * \{
@@ -91,6 +96,7 @@ const storageTypeMap = {
 
 	[LOCAL_CACHE]: LOCAL,
 	[CORE]: LOCAL,
+	[STATE_MANAGEMENT]: LOCAL,
 };
 
 /**

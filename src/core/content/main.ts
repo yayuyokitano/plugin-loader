@@ -4,11 +4,6 @@ import * as Util from '@/core/content/util';
 import * as MetadataFilter from 'metadata-filter';
 import start from '@/core/content/starter';
 
-window.Connector = new BaseConnector();
-window.Util = Util;
-window.MetadataFilter = MetadataFilter;
-window.webScrobblerScripts = {};
-
 main();
 
 async function main() {
@@ -26,6 +21,12 @@ async function fetchConnector() {
 	if (!connector) {
 		return;
 	}
+
+	window.Connector = new BaseConnector(connector);
+	window.Util = Util;
+	window.MetadataFilter = MetadataFilter;
+	window.webScrobblerScripts = {};
+
 	try {
 		await import(`../connectors/${connector?.js}`);
 		Util.debugLog(`Successfully loaded ${connector.label} connector`);

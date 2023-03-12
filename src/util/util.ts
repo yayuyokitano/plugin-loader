@@ -5,7 +5,11 @@ import {
 	GlobalOptions,
 	SavedEdit,
 } from '@/storage/options';
-import { ListenBrainzModel, Properties } from '@/storage/wrapper';
+import {
+	ListenBrainzModel,
+	Properties,
+	StateManagement,
+} from '@/storage/wrapper';
 
 /**
  * Module that contains some useful helper functions for background scripts.
@@ -107,6 +111,7 @@ export function hideObjectValue(
 		| { token?: string }
 		| Properties
 		| ListenBrainzModel
+		| StateManagement
 ): string {
 	if (!keyValue) {
 		return keyValue?.toString() ?? 'undefined';

@@ -166,7 +166,7 @@ export async function getOption(
 	key: string,
 	connector?: string
 ): Promise<unknown> {
-	if (!assertValidOverride(key)) {
+	if (!assertValidOptionKey(key)) {
 		return;
 	}
 
@@ -231,8 +231,11 @@ export async function setConnectorOption(
 
 export async function getConnectorOverrideOption(
 	connector: string,
-	key: keyof ConnectorsOverrideOptionValues
+	key: keyof GlobalOptions
 ): Promise<boolean | undefined> {
+	if (!assertValidOverride(key)) {
+		return;
+	}
 	const data = await connectorsOverrideOptions.get();
 	return data?.[connector]?.[key];
 }
@@ -265,7 +268,7 @@ function assertValidOverride(
 	key: string
 ): key is keyof ConnectorsOverrideOptionValues {
 	if (!(key in OVERRIDE_CONTENT)) {
-		throw new Error(`Unknown override key: ${key}`);
+		return false;
 	}
 	return true;
 }

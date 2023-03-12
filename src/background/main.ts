@@ -1,10 +1,15 @@
 import { getConnectorByUrl } from '@/core/content/util-connector';
+import * as BrowserStorage from '@/storage/browser-storage';
+import {
+	backgroundListener,
+	setupBackgroundListeners,
+} from '@/util/communication';
 import browser from 'webextension-polyfill';
 
 browser.runtime.onStartup.addListener(() => {
-	browser.storage.local.set({
+	const state = BrowserStorage.getStorage(BrowserStorage.STATE_MANAGEMENT);
+	state.set({
 		activeTabs: [],
-		activeConnector: '',
 	});
 });
 
@@ -60,15 +65,19 @@ browser.tabs.onActivated.addListener(async ({ tabId }) => {
 	browser.storage.local.set(await getActiveConnector(newTabs));
 });
 
-browser.runtime.onMessage.addListener(({ type, payload }, _, sendResponse) => {
-	if (type === 'getActiveConnector') {
-		sendResponse();
-		return browser.storage.local
-			.get('activeTabs')
-			.then(({ activeTabs }) =>
-				getActiveConnector(activeTabs).then(
-					(res) => res.activeConnector
-				)
-			);
-	}
-});
+setupBackgroundListeners(
+	backgroundListener({
+		type: 'startedPlaying',
+		fn: (state) => {
+			console.log('started playing');
+			console.log(state);
+		},
+	}),
+	backgroundListener({
+		type: 'scrobbled',
+		fn: (state) => {
+			console.log('scrobbled');
+			console.log(state);
+		},
+	})
+);

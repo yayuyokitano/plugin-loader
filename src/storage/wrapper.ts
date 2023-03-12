@@ -8,6 +8,7 @@ import {
 	LOCAL_CACHE,
 	NOTIFICATIONS,
 	OPTIONS,
+	STATE_MANAGEMENT,
 	StorageNamespace,
 } from '@/storage/browser-storage';
 import {
@@ -16,6 +17,7 @@ import {
 	GlobalOptions,
 	SavedEdit,
 } from '@/storage/options';
+import { State } from '@/core/types';
 
 export interface CustomPatterns {
 	[connectorId: string]: string[];
@@ -48,6 +50,15 @@ export interface ScrobblerModels {
 	Maloja?: Properties;
 }
 
+export interface ManagerTab {
+	tabId: number;
+	state: State | null;
+}
+
+export interface StateManagement {
+	activeTabs: ManagerTab[];
+}
+
 export interface DataModels extends ScrobblerModels {
 	/* sync options */
 	[CUSTOM_PATTERNS]: CustomPatterns;
@@ -59,6 +70,9 @@ export interface DataModels extends ScrobblerModels {
 	/* local options */
 	[CORE]: { appVersion: string };
 	[LOCAL_CACHE]: { [key: string]: SavedEdit };
+
+	/* state management */
+	[STATE_MANAGEMENT]: StateManagement;
 }
 
 /**

@@ -2,8 +2,14 @@ import * as MetadataFilter from 'metadata-filter';
 import browser from 'webextension-polyfill';
 import { ArtistTrackInfo, BaseState, State, TimeInfo } from '@/core/types';
 import * as Util from '@/core/content/util';
+import { ConnectorMeta } from '../connectors';
 
 export default class BaseConnector {
+	/**
+	 * Meta of connector
+	 */
+	public meta: ConnectorMeta;
+
 	/**
 	 * Selector of an element containing artist name.
 	 *
@@ -552,7 +558,9 @@ export default class BaseConnector {
 	 */
 	private stateChangedWorkerThrottled: () => void;
 
-	constructor() {
+	constructor(meta: ConnectorMeta) {
+		this.meta = meta;
+
 		this.getArtist = () => Util.getTextFromSelectors(this.artistSelector);
 
 		this.getTrack = () => Util.getTextFromSelectors(this.trackSelector);

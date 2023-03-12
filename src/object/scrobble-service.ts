@@ -1,17 +1,21 @@
 'use strict';
-import LastFmScrobbler from '@/core/background/scrobbler/lastfm/lastfm-scrobbler';
-import LibreFmScrobbler from '@/core/background/scrobbler/librefm-scrobbler';
-import ListenBrainzScrobbler from '@/core/background/scrobbler/listenbrainz/listenbrainz-scrobbler';
-import MalojaScrobbler from '@/core/background/scrobbler/maloja/maloja-scrobbler';
-import { ServiceCallResult } from '@/core/background/object/service-call-result';
-import Song from '@/core/background/object/song';
-import { ScrobblerSongInfo } from '../scrobbler/base-scrobbler';
+import LastFmScrobbler from '@/scrobbler/lastfm/lastfm-scrobbler';
+import LibreFmScrobbler from '@/scrobbler/librefm-scrobbler';
+import ListenBrainzScrobbler from '@/scrobbler/listenbrainz/listenbrainz-scrobbler';
+import MalojaScrobbler from '@/scrobbler/maloja/maloja-scrobbler';
+import { ServiceCallResult } from '@/object/service-call-result';
+import Song from '@/object/song';
+import { ScrobblerSongInfo } from '@/scrobbler/base-scrobbler';
 
 /**
  * Service to handle all scrobbling behavior.
  */
 
-export type Scrobbler = LastFmScrobbler | LibreFmScrobbler | ListenBrainzScrobbler | MalojaScrobbler;
+export type Scrobbler =
+	| LastFmScrobbler
+	| LibreFmScrobbler
+	| ListenBrainzScrobbler
+	| MalojaScrobbler;
 
 /**
  * Scrobblers that are registered and that can be bound.
@@ -29,24 +33,23 @@ const registeredScrobblers = [
  * @param array - Array of scrobblers
  * @returns True if scrobbler is in array, false otherwise
  */
-function isScrobblerInArray(scrobbler:Scrobbler, array:Scrobbler[]) {
+function isScrobblerInArray(scrobbler: Scrobbler, array: Scrobbler[]) {
 	return array.some((s) => {
 		return s.getLabel() === scrobbler.getLabel();
 	});
 }
 
 class ScrobbleService {
-
 	/**
 	 * Scrobblers that are bound, meaning they have valid session IDs.
 	 */
-	private boundScrobblers:Scrobbler[] = [];
+	private boundScrobblers: Scrobbler[] = [];
 
 	/**
 	 * Bind all registered scrobblers.
 	 * @returns Array of bound scrobblers
 	 */
-	async bindAllScrobblers():Promise<Scrobbler[]> {
+	async bindAllScrobblers(): Promise<Scrobbler[]> {
 		for (const scrobbler of registeredScrobblers) {
 			try {
 				await scrobbler.getSession();
@@ -63,7 +66,7 @@ class ScrobbleService {
 	 * Bind given scrobbler.
 	 * @param scrobbler - Scrobbler instance
 	 */
-	bindScrobbler(scrobbler:Scrobbler):void {
+	bindScrobbler(scrobbler: Scrobbler): void {
 		if (!isScrobblerInArray(scrobbler, this.boundScrobblers)) {
 			this.boundScrobblers.push(scrobbler);
 			console.log(`Bind ${scrobbler.getLabel()} scrobbler`);
@@ -74,7 +77,7 @@ class ScrobbleService {
 	 * Unbind given scrobbler.
 	 * @param scrobbler - Scrobbler instance
 	 */
-	unbindScrobbler(scrobbler:Scrobbler):void {
+	unbindScrobbler(scrobbler: Scrobbler): void {
 		if (isScrobblerInArray(scrobbler, this.boundScrobblers)) {
 			const index = this.boundScrobblers.indexOf(scrobbler);
 			this.boundScrobblers.splice(index, 1);
@@ -90,20 +93,26 @@ class ScrobbleService {
 	 * @param song - Song instance
 	 * @returns Promise resolved with array of song info objects
 	 */
-	getSongInfo(song:Song):Promise<(Record<string, never> | ScrobblerSongInfo |null)[]> {
+	getSongInfo(
+		song: Song
+	): Promise<(Record<string, never> | ScrobblerSongInfo | null)[]> {
 		const scrobblers = registeredScrobblers.filter((scrobbler) => {
 			return scrobbler.canLoadSongInfo();
 		});
 		console.log(`Send "get info" request: ${scrobblers.length}`);
 
-		return Promise.all(scrobblers.map(async (scrobbler) => {
-			try {
-				return await scrobbler.getSongInfo(song);
-			} catch {
-				console.warn(`Unable to get song info from ${scrobbler.getLabel()}`);
-				return null;
-			}
-		}));
+		return Promise.all(
+			scrobblers.map(async (scrobbler) => {
+				try {
+					return await scrobbler.getSongInfo(song);
+				} catch {
+					console.warn(
+						`Unable to get song info from ${scrobbler.getLabel()}`
+					);
+					return null;
+				}
+			})
+		);
 	}
 
 	/**
@@ -111,17 +120,26 @@ class ScrobbleService {
 	 * @param song - Song instance
 	 * @returns Promise that will be resolved then the task will complete
 	 */
-	sendNowPlaying(song:Song):Promise<ServiceCallResult[]> {
-		console.log(`Send "now playing" request: ${this.boundScrobblers.length}`);
+	sendNowPlaying(song: Song): Promise<ServiceCallResult[]> {
+		console.log(
+			`Send "now playing" request: ${this.boundScrobblers.length}`
+		);
 
-		return Promise.all(this.boundScrobblers.map(async (scrobbler) => {
-			// Forward result (including errors) to caller
-			try {
-				return await scrobbler.sendNowPlaying(scrobbler.applyFilter(song));
-			} catch (result) {
-				return this.processErrorResult(scrobbler, result as ServiceCallResult);
-			}
-		}));
+		return Promise.all(
+			this.boundScrobblers.map(async (scrobbler) => {
+				// Forward result (including errors) to caller
+				try {
+					return await scrobbler.sendNowPlaying(
+						scrobbler.applyFilter(song)
+					);
+				} catch (result) {
+					return this.processErrorResult(
+						scrobbler,
+						result as ServiceCallResult
+					);
+				}
+			})
+		);
 	}
 
 	/**
@@ -129,17 +147,24 @@ class ScrobbleService {
 	 * @param song - Song instance
 	 * @returns Promise that will be resolved then the task will complete
 	 */
-	scrobble(song:Song):Promise<ServiceCallResult[]> {
+	scrobble(song: Song): Promise<ServiceCallResult[]> {
 		console.log(`Send "scrobble" request: ${this.boundScrobblers.length}`);
 
-		return Promise.all(this.boundScrobblers.map(async (scrobbler) => {
-			// Forward result (including errors) to caller
-			try {
-				return await scrobbler.scrobble(scrobbler.applyFilter(song));
-			} catch (result) {
-				return this.processErrorResult(scrobbler, result as ServiceCallResult);
-			}
-		}));
+		return Promise.all(
+			this.boundScrobblers.map(async (scrobbler) => {
+				// Forward result (including errors) to caller
+				try {
+					return await scrobbler.scrobble(
+						scrobbler.applyFilter(song)
+					);
+				} catch (result) {
+					return this.processErrorResult(
+						scrobbler,
+						result as ServiceCallResult
+					);
+				}
+			})
+		);
 	}
 
 	/**
@@ -148,28 +173,36 @@ class ScrobbleService {
 	 * @param flag - Flag indicates song is loved
 	 * @returns Promise that will be resolved then the task will complete
 	 */
-	async toggleLove(song:Song, flag:boolean):Promise<(ServiceCallResult|Record<string, never>)[]> {
+	async toggleLove(
+		song: Song,
+		flag: boolean
+	): Promise<(ServiceCallResult | Record<string, never>)[]> {
 		const scrobblers = registeredScrobblers.filter((scrobbler) => {
 			return scrobbler.canLoveSong();
 		});
 		const requestName = flag ? 'love' : 'unlove';
 		console.log(`Send "${requestName}" request: ${scrobblers.length}`);
 
-		return Promise.all(scrobblers.map(async (scrobbler) => {
-			// Forward result (including errors) to caller
-			try {
-				return await scrobbler.toggleLove(song, flag);
-			} catch (result) {
-				return this.processErrorResult(scrobbler, result as ServiceCallResult);
-			}
-		}));
+		return Promise.all(
+			scrobblers.map(async (scrobbler) => {
+				// Forward result (including errors) to caller
+				try {
+					return await scrobbler.toggleLove(song, flag);
+				} catch (result) {
+					return this.processErrorResult(
+						scrobbler,
+						result as ServiceCallResult
+					);
+				}
+			})
+		);
 	}
 
 	/**
 	 * Get all registered scrobblers.
 	 * @returns Array of bound scrobblers
 	 */
-	getRegisteredScrobblers():Scrobbler[] {
+	getRegisteredScrobblers(): Scrobbler[] {
 		return registeredScrobblers;
 	}
 
@@ -178,7 +211,7 @@ class ScrobbleService {
 	 * @param label - Scrobbler label
 	 * @returns Found scrobbler object
 	 */
-	getScrobblerByLabel(label:string):Scrobbler|null {
+	getScrobblerByLabel(label: string): Scrobbler | null {
 		for (const scrobbler of registeredScrobblers) {
 			if (scrobbler.getLabel() === label) {
 				return scrobbler;
@@ -194,7 +227,10 @@ class ScrobbleService {
 	 * @param result - API call result
 	 * @returns Promise resolved with result object
 	 */
-	async processErrorResult(scrobbler:Scrobbler, result:ServiceCallResult): Promise<ServiceCallResult> {
+	async processErrorResult(
+		scrobbler: Scrobbler,
+		result: ServiceCallResult
+	): Promise<ServiceCallResult> {
 		const isOtherError = result === ServiceCallResult.ERROR_OTHER;
 		const isAuthError = result === ServiceCallResult.ERROR_AUTH;
 
