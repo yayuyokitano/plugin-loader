@@ -1,3 +1,4 @@
+import { ControllerModeStr } from '@/object/controller/controller';
 import Song from '@/object/song';
 import browser from 'webextension-polyfill';
 
@@ -9,12 +10,12 @@ interface BackgroundCommunications {
 }
 
 interface ContentCommunications {
-	startedPlaying: {
-		payload: Song;
+	controllerModeChange: {
+		payload: ControllerModeStr;
 		response: void;
 	};
-	scrobbled: {
-		payload: Song;
+	songUpdate: {
+		payload: Song | null;
 		response: void;
 	};
 }

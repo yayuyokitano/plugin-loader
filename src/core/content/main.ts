@@ -3,6 +3,7 @@ import BaseConnector from '@/core/content/connector';
 import * as Util from '@/core/content/util';
 import * as MetadataFilter from 'metadata-filter';
 import start from '@/core/content/starter';
+import browser from 'webextension-polyfill';
 
 main();
 
@@ -28,7 +29,7 @@ async function fetchConnector() {
 	window.webScrobblerScripts = {};
 
 	try {
-		await import(`../connectors/${connector?.js}`);
+		await import(browser.runtime.getURL(`connectors/${connector?.js}`));
 		Util.debugLog(`Successfully loaded ${connector.label} connector`);
 	} catch (err) {
 		Util.debugLog(

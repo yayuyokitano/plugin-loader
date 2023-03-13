@@ -5,6 +5,10 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "dev": "vite dev",
+    "build:chrome": "cross-env BROWSER=chrome tsx build.ts",
+    "build:firefox": "cross-env BROWSER=firefox tsx build.ts",
+    "build:safari": "cross-env BROWSER=safari tsx build.ts",
     "build": "vite build",
     "buildts": "tsc --project tsconfig.connectors.json",
     "test": "vitest"
@@ -27,13 +31,13 @@
     "webextension-polyfill": "^0.10.0"
   },
   "devDependencies": {
-    "@crxjs/vite-plugin": "^2.0.0-beta.14",
     "@types/blueimp-md5": "^2.18.0",
     "@types/fs-extra": "^11.0.1",
     "@types/node": "^18.14.6",
     "@types/react": "^18.0.28",
     "@types/webextension-polyfill": "^0.10.0",
     "@typescript-eslint/eslint-plugin": "^5.54.1",
+    "cross-env": "^7.0.3",
     "eslint": "^8.35.0",
     "eslint-config-web-scrobbler": "^2.1.1",
     "eslint-plugin-tsdoc": "^0.2.17",
@@ -45,6 +49,7 @@
     "solid-js": "^1.6.13",
     "stylelint": "^13.13.1",
     "stylelint-config-web-scrobbler": "^0.2.0",
+    "tsx": "^3.12.5",
     "typescript": "^4.9.5",
     "vite-plugin-solid": "^2.6.1",
     "vite-plugin-static-copy": "^0.13.1"

@@ -1,7 +1,7 @@
-import type { ManifestV3Export } from '@crxjs/vite-plugin';
+import { Manifest } from 'webextension-polyfill';
 import pkg from './package.json';
 
-export default <ManifestV3Export>{
+export const common: Manifest.WebExtensionManifest = {
 	manifest_version: 3,
 	name: 'Plugin Loader',
 	default_locale: 'en',
@@ -13,7 +13,7 @@ export default <ManifestV3Export>{
 	content_scripts: [
 		{
 			matches: ['<all_urls>'],
-			js: ['src/core/content/main.ts'],
+			js: ['content/main.js'],
 			all_frames: true,
 		},
 	],
@@ -27,14 +27,32 @@ export default <ManifestV3Export>{
 
 	action: {
 		default_icon: {
-			'19': 'src/icons/page_action_unsupported_19.png',
-			'38': 'src/icons/page_action_unsupported_38.png',
+			'19': 'icons/page_action_unsupported_19.png',
+			'38': 'icons/page_action_unsupported_38.png',
 		},
 		default_title: '__MSG_pageActionUnsupported__',
 		default_popup: 'src/ui/popup/index.html',
 	},
+};
+
+export const chromeManifest: Manifest.WebExtensionManifest = {
+	...common,
 
 	background: {
-		service_worker: 'src/background/main',
+		service_worker: 'background/main.js',
+	},
+};
+
+export const firefoxManifest: Manifest.WebExtensionManifest = {
+	...common,
+
+	background: {
+		scripts: ['background/main.js'],
+	},
+
+	browser_specific_settings: {
+		gecko: {
+			id: 'yayuyokitano@web-scrobbler.com',
+		},
 	},
 };

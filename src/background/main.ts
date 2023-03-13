@@ -67,17 +67,16 @@ browser.tabs.onActivated.addListener(async ({ tabId }) => {
 
 setupBackgroundListeners(
 	backgroundListener({
-		type: 'startedPlaying',
-		fn: (state) => {
-			console.log('started playing');
-			console.log(state);
+		type: 'controllerModeChange',
+		fn: (mode, sender) => {
+			console.log(`changed mode to ${mode} in tab ${sender.tab?.id}`);
 		},
 	}),
 	backgroundListener({
-		type: 'scrobbled',
-		fn: (state) => {
-			console.log('scrobbled');
-			console.log(state);
+		type: 'songUpdate',
+		fn: (song, sender) => {
+			console.log(`song changed in tab ${sender.tab?.id}`);
+			console.log(song);
 		},
 	})
 );

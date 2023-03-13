@@ -27,7 +27,8 @@ const fieldsToCheckSongChange = ['artist', 'track', 'album', 'uniqueID'];
 export type ControllerEvent =
 	(typeof ControllerEvents)[keyof typeof ControllerEvents];
 
-type ControllerModeStr = (typeof ControllerMode)[keyof typeof ControllerMode];
+export type ControllerModeStr =
+	(typeof ControllerMode)[keyof typeof ControllerMode];
 
 /**
  * Object that handles song playback and scrobbling actions.
@@ -74,14 +75,20 @@ export default class Controller {
 	 * Called if current song is updated.
 	 */
 	public onSongUpdated(): void {
-		// do nothing
+		sendContentMessage({
+			type: 'songUpdate',
+			payload: this.currentSong,
+		});
 	}
 
 	/**
 	 * Called if a controller mode is changed.
 	 */
 	public onModeChanged(): void {
-		// do nothing
+		sendContentMessage({
+			type: 'controllerModeChange',
+			payload: this.mode,
+		});
 	}
 
 	/**
@@ -571,11 +578,6 @@ export default class Controller {
 			return;
 		}
 		this.currentSong.flags.isMarkedAsPlaying = true;
-		sendContentMessage({
-			type: 'startedPlaying',
-			payload: this.currentSong,
-		});
-
 		const results = await ScrobbleService.sendNowPlaying(this.currentSong);
 		if (isAnyResult(results, ServiceCallResult.RESULT_OK)) {
 			this.debugLog('Song set as now playing');
@@ -605,11 +607,6 @@ export default class Controller {
 		if (!assertSongNotNull(this.currentSong)) {
 			return;
 		}
-
-		sendContentMessage({
-			type: 'scrobbled',
-			payload: this.currentSong,
-		});
 		const results = await ScrobbleService.scrobble(this.currentSong);
 		if (isAnyResult(results, ServiceCallResult.RESULT_OK)) {
 			this.debugLog('Scrobbled successfully');
