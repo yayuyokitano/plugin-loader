@@ -28,7 +28,7 @@ export default function ContactComponent() {
 				<li class={styles.contactEntry}>
 					<Lock />
 					<span class={styles.brandText}>Privacy</span>
-					<span>{t("contactPrivacyPolicyDesc")}</span>
+					<span class={styles.privacySpan}>{t("contactPrivacyPolicyDesc")}</span>
 				</li>
 			</a>
 		</ul>
