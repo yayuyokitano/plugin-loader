@@ -8,12 +8,24 @@ import Favorite from "@suid/icons-material/FavoriteOutlined";
 import Info from "@suid/icons-material/InfoOutlined";
 import Help from "@suid/icons-material/HelpOutlined";
 import Contacts from "@suid/icons-material/ContactsOutlined";
+import Settings from "@suid/icons-material/SettingsOutlined";
+import ManageAccounts from "@suid/icons-material/ManageAccountsOutlined";
 import Sidebar from "./sidebar/sidebar";
 import InfoComponent from "@/ui/options/components/info";
 import FAQ from "./components/faq";
 import ContactComponent from "./components/contact";
+import OptionsComponent from "./components/options";
+import Accounts from "./components/accounts";
 
 export type Settings = {
+	namei18n: "optionsAccounts",
+	icon: typeof ManageAccounts,
+	element: typeof Accounts,
+} | {
+	namei18n: "optionsOptions",
+	icon: typeof Settings,
+	element: typeof OptionsComponent,
+} | {
 	namei18n: "contactTitle",
 	icon: typeof Contacts,
 	element: typeof ContactComponent,
@@ -32,6 +44,8 @@ export type Settings = {
 }
 
 const settings: Settings[] = [
+	{namei18n: "optionsAccounts", icon: ManageAccounts, element: Accounts},
+	{namei18n: "optionsOptions", icon: Settings, element: OptionsComponent},
 	{namei18n: "contactTitle", icon: Contacts, element: ContactComponent},
 	{namei18n: "faqTitle", icon: Help, element: FAQ},
 	{namei18n: "optionsAbout", icon: Info, element: InfoComponent},
