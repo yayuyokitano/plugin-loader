@@ -81,6 +81,7 @@ export const buildStart: UserConfig = {
 		rollupOptions: {
 			input: {
 				popup: resolve(root, 'ui', 'popup', 'index.html'),
+				options: resolve(root, 'ui', 'options', 'index.html'),
 			},
 			output: {},
 		},
@@ -97,6 +98,10 @@ export const buildStart: UserConfig = {
 				},
 				{
 					src: resolve(root, 'icons'),
+					dest: '',
+				},
+				{
+					src: resolve(root, 'img'),
 					dest: '',
 				},
 			],

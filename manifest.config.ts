@@ -33,6 +33,11 @@ export const common: Manifest.WebExtensionManifest = {
 		default_title: '__MSG_pageActionUnsupported__',
 		default_popup: 'src/ui/popup/index.html',
 	},
+
+	options_ui: {
+		page: 'src/ui/options/index.html',
+		open_in_tab: true,
+	},
 };
 
 export const chromeManifest: Manifest.WebExtensionManifest = {

@@ -288,7 +288,7 @@
         "description": "'About' section"
     },
     "aboutChangelog": {
-        "message": "El registro de cambios de la actual versión está disponible <a id='latest-release' target='_blank' href='#'>aquí</a>. Para el registro completo de cambios visite <a target='_blank' href='https://github.com/web-scrobbler/web-scrobbler/releases'>esta página.</a>",
+        "message": "El registro de cambios de la actual versión está disponible <a id='latest-release' target='_blank' href='$1'>aquí</a>. Para el registro completo de cambios visite <a target='_blank' href='https://github.com/web-scrobbler/web-scrobbler/releases'>esta página.</a>",
         "description": "'About' section text"
     },
     "aboutExtensionDesc": {

@@ -288,7 +288,7 @@
         "description": "'About' section"
     },
     "aboutChangelog": {
-        "message": "Lista nowości w obecnej wersji dostępna jest <a id='latest-release' target='_blank' href='#'>tutaj</a>. Pełny wykaz zmian dostępny jest na <a target='_blank' href='https://github.com/web-scrobbler/web-scrobbler/releases'>stronie projektu</a>.",
+        "message": "Lista nowości w obecnej wersji dostępna jest <a id='latest-release' target='_blank' href='$1'>tutaj</a>. Pełny wykaz zmian dostępny jest na <a target='_blank' href='https://github.com/web-scrobbler/web-scrobbler/releases'>stronie projektu</a>.",
         "description": "'About' section text"
     },
     "aboutExtensionDesc": {

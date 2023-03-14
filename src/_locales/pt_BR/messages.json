@@ -264,7 +264,7 @@
         "description": "'About' section"
     },
     "aboutChangelog": {
-        "message": "As notas de atualização da versão atual estão disponíveis <a id='latest-release' target='_blank' href='#'>aqui</a>. Para uma lista completa das atualizações, acesse <a target='_blank' href='https://github.com/web-scrobbler/web-scrobbler/releases'>esta página</a>.",
+        "message": "As notas de atualização da versão atual estão disponíveis <a id='latest-release' target='_blank' href='$1'>aqui</a>. Para uma lista completa das atualizações, acesse <a target='_blank' href='https://github.com/web-scrobbler/web-scrobbler/releases'>esta página</a>.",
         "description": "'About' section text"
     },
     "aboutExtensionDesc": {

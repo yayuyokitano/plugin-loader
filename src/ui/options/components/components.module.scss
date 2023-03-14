@@ -1,0 +1,73 @@
+.linkButton {
+	align-items: center;
+	background-color: var(--always-last-fm);
+	border: none;
+	border-radius: 3px;
+	color: var(--always-light);
+	cursor: pointer;
+	display: flex;
+	font-size: 1.2em;
+	padding: 0.5em 1em;
+	width: min-content;
+
+	&:hover {
+		background-color: var(--always-last-fm-hover);
+	}
+
+	svg {
+		margin-bottom: 4px;
+		margin-right: 0.2em;
+	}
+
+	span {
+		white-space: nowrap;
+	}
+}
+
+.contactList {
+	padding-left: 0;
+
+	.contactEntry {
+		align-items: center;
+		display: flex;
+		padding: 0.5em 0;
+
+		.invertImg {
+			filter: var(--invert-filter);
+		}
+
+		span {
+			color: var(--text);
+			font-size: 1.2em;
+
+			&:not(.twitterBrandText) {
+				margin-left: 0.4em;
+			}
+		}
+
+		svg {
+			color: var(--text);
+			height: 32px;
+			width: 32px;
+		}
+
+		.githubSpan {
+			margin-top: 4px;
+		}
+
+		.twitterSpan {
+			margin-top: 5px;
+		}
+
+		.brandText {
+			font-size: 1.7em;
+			font-stretch: ultra-condensed;
+			font-weight: bold;
+			margin-left: 5px;
+		}
+
+		.twitterBrandText {
+			color: #1c9bef;
+		}
+	}
+}

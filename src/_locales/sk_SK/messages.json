@@ -264,7 +264,7 @@
         "description": "'About' section"
     },
     "aboutChangelog": {
-        "message": "Popis zmien v aktuálnej verzii je dostupný <a id='latest-release' target='_blank' href='#'>tu</a>. Detailnejší popis zmien nájdete na <a target='_blank' href='https://github.com/web-scrobbler/web-scrobbler/releases'>tejto stránke</a>.",
+        "message": "Popis zmien v aktuálnej verzii je dostupný <a id='latest-release' target='_blank' href='$1'>tu</a>. Detailnejší popis zmien nájdete na <a target='_blank' href='https://github.com/web-scrobbler/web-scrobbler/releases'>tejto stránke</a>.",
         "description": "'About' section text"
     },
     "aboutExtensionDesc": {

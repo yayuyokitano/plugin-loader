@@ -288,7 +288,7 @@
         "description": "'About' section"
     },
     "aboutChangelog": {
-        "message": "当前版本的更新日志在<a id='latest-release' target='_blank' href='#'>这里</a>。访问<a target='_blank' href='https://github.com/web-scrobbler/web-scrobbler/releases'>这个页面</a>以查看完整的更新日志。",
+        "message": "当前版本的更新日志在<a id='latest-release' target='_blank' href='$1'>这里</a>。访问<a target='_blank' href='https://github.com/web-scrobbler/web-scrobbler/releases'>这个页面</a>以查看完整的更新日志。",
         "description": "'About' section text"
     },
     "aboutExtensionDesc": {
