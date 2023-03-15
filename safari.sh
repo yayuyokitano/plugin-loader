@@ -1,3 +1,4 @@
+rm -r build/safari
 mkdir build/safari
 cd build/safari
 xcrun safari-web-extension-converter ../safariraw --no-open
