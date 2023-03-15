@@ -2,7 +2,7 @@ import { render } from "solid-js/web";
 import styles from "./settings.module.scss";
 import { initializeThemes } from "@/theme/themes";
 import "@/theme/themes.scss";
-import { createSignal } from "solid-js";
+import { JSXElement, Match, Suspense, Switch, createEffect, createSignal } from "solid-js";
 import ShowSomeLove from "./components/showSomeLove";
 import Favorite from "@suid/icons-material/FavoriteOutlined";
 import Info from "@suid/icons-material/InfoOutlined";
@@ -14,7 +14,7 @@ import Sidebar from "./sidebar/sidebar";
 import InfoComponent from "@/ui/options/components/info";
 import FAQ from "./components/faq";
 import ContactComponent from "./components/contact";
-import OptionsComponent from "./components/options";
+import OptionsComponent, { EditsModal } from "./components/options";
 import Accounts from "./components/accounts";
 
 export type Settings = {
@@ -54,8 +54,11 @@ const settings: Settings[] = [
 
 function Options() {
 	const [activeSetting, setActiveSetting] = createSignal<Settings>({namei18n: "showSomeLoveTitle", icon: Favorite, element: ShowSomeLove})
+	const [activeModal, setActiveModal] = createSignal<string>("");
+	let modal: HTMLDialogElement | undefined;
 
 	return (
+		<>
 		<div class={styles.settings}>
 			<Sidebar
 				items={settings}
@@ -64,10 +67,21 @@ function Options() {
 			/>
 			<div class={styles.settingsContentWrapper}>
 				<div class={styles.settingsContent}>
-					{activeSetting().element()}
+					{activeSetting().element({setActiveModal, modal})}
 				</div>
 			</div>
 		</div>
+		<dialog ref={modal} class={styles.modal} onClose={() => setActiveModal("")}>
+			<div class={styles.modalContent}>
+				<Switch fallback={<div>Loading...</div>}>
+					<Match when={activeModal() === "savedEdits"}>
+						<EditsModal />
+					</Match>
+				</Switch>
+			</div>
+		</dialog>
+		</>
+
 	)
 }
 

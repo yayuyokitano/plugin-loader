@@ -1,4 +1,24 @@
-.linkButton {
+.deleteListing {
+	align-items: center;
+	display: flex;
+
+	&:not(:last-child) {
+		margin-bottom: 0.5em;
+	}
+
+	span {
+		font-size: 1.2em;
+	}
+}
+
+.editButtons {
+	display: flex;
+	gap: 0.5em;
+}
+
+.linkButton,
+.editButton,
+.deleteEditButton {
 	align-items: center;
 	background-color: var(--always-last-fm);
 	border: none;
@@ -6,22 +26,37 @@
 	color: var(--always-light);
 	cursor: pointer;
 	display: flex;
-	font-size: 1.2em;
-	padding: 0.5em 1em;
 	width: min-content;
 
 	&:hover {
 		background-color: var(--always-last-fm-hover);
 	}
 
-	svg {
-		margin-bottom: 4px;
-		margin-right: 0.2em;
-	}
-
 	span {
 		white-space: nowrap;
 	}
+}
+
+.deleteEditButton {
+	margin-right: 0.5em;
+}
+
+.linkButton,
+.editButton {
+	font-size: 1.2em;
+	padding: 0.5em 1em;
+
+	svg {
+		margin-right: 0.2em;
+	}
+}
+
+.linkButton svg {
+	margin-bottom: 4px;
+}
+
+.editButton svg {
+	margin-left: -5px;
 }
 
 .contactList {
