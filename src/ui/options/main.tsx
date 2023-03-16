@@ -2,20 +2,14 @@ import { render } from 'solid-js/web';
 import styles from './settings.module.scss';
 import { initializeThemes } from '@/theme/themes';
 import '@/theme/themes.scss';
-import {
-	JSXElement,
-	Match,
-	Suspense,
-	Switch,
-	createEffect,
-	createSignal,
-} from 'solid-js';
+import { Match, Switch, createSignal, onCleanup } from 'solid-js';
 import ShowSomeLove from './components/showSomeLove';
 import Favorite from '@suid/icons-material/FavoriteOutlined';
 import Info from '@suid/icons-material/InfoOutlined';
 import Help from '@suid/icons-material/HelpOutlined';
 import Contacts from '@suid/icons-material/ContactsOutlined';
 import Settings from '@suid/icons-material/SettingsOutlined';
+import Close from '@suid/icons-material/CloseOutlined';
 import ManageAccounts from '@suid/icons-material/ManageAccountsOutlined';
 import Sidebar from './sidebar/sidebar';
 import InfoComponent from '@/ui/options/components/info';
@@ -74,6 +68,19 @@ function Options() {
 	const [activeModal, setActiveModal] = createSignal<string>('');
 	let modal: HTMLDialogElement | undefined;
 
+	const onclick = (e: MouseEvent) => {
+		const target = e.target;
+		if (!(target instanceof HTMLElement)) return;
+		if (
+			target.closest(`.${styles.modal}`) &&
+			!target.classList.contains(styles.modal)
+		)
+			return;
+		modal?.close();
+	};
+	document.addEventListener('click', onclick);
+	onCleanup(() => document.removeEventListener('click', onclick));
+
 	return (
 		<>
 			<div class={styles.settings}>
@@ -100,6 +107,12 @@ function Options() {
 						</Match>
 					</Switch>
 				</div>
+				<button
+					class={styles.modalClose}
+					onClick={() => modal?.close()}
+				>
+					<Close />
+				</button>
 			</dialog>
 		</>
 	);

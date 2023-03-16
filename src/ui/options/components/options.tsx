@@ -226,7 +226,8 @@ function ViewEdits(props: {
 	return (
 		<button
 			class={styles.editButton}
-			onClick={() => {
+			onClick={(e) => {
+				e.stopImmediatePropagation();
 				setActiveModal('savedEdits');
 				modal?.showModal();
 			}}
