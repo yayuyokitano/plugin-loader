@@ -82,21 +82,37 @@ function Checkbox(props: {
 function SummaryCheckbox(props: {
 	title: string;
 	label: string;
+	id: string;
 	isChecked: () => boolean;
 	onInput: (
-		e: InputEvent & {
+		e: Event & {
 			currentTarget: HTMLInputElement;
 			target: Element;
 		}
 	) => void;
 }) {
-	const { title, label, isChecked, onInput } = props;
+	const { title, label, id, isChecked, onInput } = props;
 	return (
 		<div class={`${styles.checkboxOption} ${styles.summaryCheckbox}`}>
 			<span title={title} class={styles.summarySpan}>
 				{label}
-				<label>
+				<label
+					onClick={(e) => {
+						// Safari doesn't like labeled checkboxes in detail summaries
+						// hacky but it works, hopefully it doesnt stop working
+						e.preventDefault();
+						const checkbox = document.getElementById(
+							id
+						) as HTMLInputElement;
+						checkbox.checked = !checkbox.checked;
+						onInput({
+							...e,
+							currentTarget: checkbox,
+						});
+					}}
+				>
 					<input
+						id={id}
 						type="checkbox"
 						checked={isChecked()}
 						onInput={onInput}
@@ -513,6 +529,7 @@ function ConnectorOption(props: {
 					<SummaryCheckbox
 						title={connector.label}
 						label={connector.label}
+						id={connector.id}
 						isChecked={() =>
 							!(
 								options()?.disabledConnectors?.[connector.id] ??
