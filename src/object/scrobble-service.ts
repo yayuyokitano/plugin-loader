@@ -27,6 +27,8 @@ const registeredScrobblers = [
 	new MalojaScrobbler(),
 ];
 
+export type ScrobblerLabel = 'Last.fm' | 'ListenBrainz' | 'Libre.fm' | 'Maloja';
+
 /**
  * Check if scrobbler is in given array of scrobblers.
  * @param scrobbler - Scrobbler instance
@@ -211,7 +213,7 @@ class ScrobbleService {
 	 * @param label - Scrobbler label
 	 * @returns Found scrobbler object
 	 */
-	getScrobblerByLabel(label: string): Scrobbler | null {
+	getScrobblerByLabel(label: ScrobblerLabel): Scrobbler | null {
 		for (const scrobbler of registeredScrobblers) {
 			if (scrobbler.getLabel() === label) {
 				return scrobbler;

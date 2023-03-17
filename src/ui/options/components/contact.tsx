@@ -13,6 +13,7 @@ export default function ContactComponent() {
 				<a
 					href="https://github.com/web-scrobbler/web-scrobbler/issues"
 					target="_blank"
+					rel="noopener noreferrer"
 				>
 					<li class={styles.contactEntry}>
 						<img
@@ -34,7 +35,11 @@ export default function ContactComponent() {
 						</span>
 					</li>
 				</a>
-				<a href="https://twitter.com/web_scrobbler" target="_blank">
+				<a
+					href="https://twitter.com/web_scrobbler"
+					target="_blank"
+					rel="noopener noreferrer"
+				>
 					<li class={styles.contactEntry}>
 						<img src={twitterBird} alt="" width={32} height={32} />
 						<span
@@ -47,7 +52,11 @@ export default function ContactComponent() {
 						</span>
 					</li>
 				</a>
-				<a href={t('contactPrivacyPolicyUrl')} target="_blank">
+				<a
+					href={t('contactPrivacyPolicyUrl')}
+					target="_blank"
+					rel="noopener noreferrer"
+				>
 					<li class={styles.contactEntry}>
 						<Lock />
 						<span class={styles.brandText}>Privacy</span>

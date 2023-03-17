@@ -39,6 +39,7 @@ export default function Unsupported() {
 				<span>{t('unsupportedWebsiteDesc2')} </span>
 				<a
 					target="_blank"
+					rel="noopener noreferrer"
 					href="https://cloud.google.com/docs/chrome-enterprise/policies/?policy=ExtensionSettings"
 				>
 					{t('learnMoreLabel')}

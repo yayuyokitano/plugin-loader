@@ -65,7 +65,7 @@ export default class ListenBrainzScrobbler extends BaseScrobbler<'ListenBrainz'>
 			return '';
 		}
 
-		return await this.getProfileUrl();
+		return await super.getProfileUrl();
 	}
 
 	/** @override */

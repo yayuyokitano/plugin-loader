@@ -4,6 +4,7 @@ import * as Util from '@/core/content/util';
 import * as MetadataFilter from 'metadata-filter';
 import start from '@/core/content/starter';
 import browser from 'webextension-polyfill';
+import scrobbleService from '@/object/scrobble-service';
 
 main();
 
@@ -27,6 +28,7 @@ async function fetchConnector() {
 	window.Util = Util;
 	window.MetadataFilter = MetadataFilter;
 	window.webScrobblerScripts = {};
+	await scrobbleService.bindAllScrobblers();
 
 	try {
 		await import(browser.runtime.getURL(`connectors/${connector?.js}`));

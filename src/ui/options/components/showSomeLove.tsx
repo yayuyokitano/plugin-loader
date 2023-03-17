@@ -12,6 +12,7 @@ export default function ShowSomeLove() {
 				class={styles.linkButton}
 				href="https://opencollective.com/web-scrobbler/donate"
 				target="_blank"
+				rel="noopener noreferrer"
 			>
 				<VolunteerActivism />
 				<span>{t('donationButtonLabel')}</span>
