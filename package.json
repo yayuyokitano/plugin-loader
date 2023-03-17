@@ -1,6 +1,6 @@
 {
   "name": "plugin-loader",
-  "version": "2.70.0",
+  "version": "2.88.0",
   "description": "extension that loads declarative plugins",
   "main": "index.js",
   "type": "module",

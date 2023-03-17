@@ -16,11 +16,17 @@ import Settings from '@suid/icons-material/SettingsOutlined';
 import ExpandMore from '@suid/icons-material/ExpandMoreOutlined';
 import Delete from '@suid/icons-material/DeleteOutlined';
 import connectors, { ConnectorMeta } from '@/core/connectors';
-import Close from '@suid/icons-material/CloseOutlined';
-import Check from '@suid/icons-material/CheckOutlined';
-import IndeterminateCheckBox from '@suid/icons-material/IndeterminateCheckBoxOutlined';
 import Add from '@suid/icons-material/AddOutlined';
 import { CustomPatterns } from '@/storage/wrapper';
+import {
+	Checkbox,
+	ConnectorOptionEntry,
+	GlobalOptionEntry,
+	RadioButtons,
+	SummaryCheckbox,
+	TripleCheckbox,
+	TripleCheckboxState,
+} from './inputs';
 
 const globalOptions = BrowserStorage.getStorage(BrowserStorage.OPTIONS);
 const connectorOptions = BrowserStorage.getStorage(
@@ -39,127 +45,79 @@ export default function OptionsComponent(props: {
 	modal: HTMLDialogElement | undefined;
 }) {
 	const { setActiveModal, modal } = props;
+	const [options, setOptions] = createResource(
+		globalOptions.get.bind(globalOptions)
+	);
 	return (
 		<>
 			<h1>{t('optionsOptions')}</h1>
-			<GlobalOptionsList />
+			<GlobalOptionsList options={options} setOptions={setOptions} />
 			<ConnectorOptionsList />
+			<ScrobbleBehavior options={options} setOptions={setOptions} />
 			<EditedTracks setActiveModal={setActiveModal} modal={modal} />
 			<ConnectorOverrideOptions />
 		</>
 	);
 }
 
-function Checkbox(props: {
-	title: string;
-	label: string;
-	isChecked: () => boolean;
-	onInput: (
-		e: InputEvent & {
-			currentTarget: HTMLInputElement;
-			target: Element;
-		}
-	) => void;
-}) {
-	const { title, label, isChecked, onInput } = props;
-	return (
-		<div class={styles.checkboxOption}>
-			<label title={title} class={styles.bigLabel}>
-				{label}
-				<input
-					type="checkbox"
-					checked={isChecked()}
-					onInput={onInput}
-				/>
-				<span class={styles.checkboxWrapper}>
-					<span class={styles.checkbox} />
-				</span>
-			</label>
-		</div>
-	);
-}
-
-function SummaryCheckbox(props: {
-	title: string;
-	label: string;
-	id: string;
-	isChecked: () => boolean;
-	onInput: (
-		e: Event & {
-			currentTarget: HTMLInputElement;
-			target: Element;
-		}
-	) => void;
-}) {
-	const { title, label, id, isChecked, onInput } = props;
-	return (
-		<div class={`${styles.checkboxOption} ${styles.summaryCheckbox}`}>
-			<span title={title} class={styles.summarySpan}>
-				{label}
-				<label
-					onClick={(e) => {
-						// Safari doesn't like labeled checkboxes in detail summaries
-						// hacky but it works, hopefully it doesnt stop working
-						e.preventDefault();
-						const checkbox = document.getElementById(
-							id
-						) as HTMLInputElement;
-						checkbox.checked = !checkbox.checked;
-						onInput({
-							...e,
-							currentTarget: checkbox,
-						});
-					}}
-				>
-					<input
-						id={id}
-						type="checkbox"
-						checked={isChecked()}
-						onInput={onInput}
-					/>
-					<span class={styles.checkboxWrapper}>
-						<span class={styles.checkbox} />
-					</span>
-				</label>
-			</span>
-		</div>
-	);
-}
-
-function ConnectorOptionEntry<K extends keyof Options.ConnectorOptions>(props: {
-	options: Resource<Options.ConnectorOptions | null>;
+function ScrobbleBehavior(props: {
+	options: Resource<Options.GlobalOptions | null>;
 	setOptions: ResourceActions<
-		Options.ConnectorOptions | null | undefined,
+		Options.GlobalOptions | null | undefined,
 		unknown
 	>;
-	i18ntitle: string;
-	i18nlabel: string;
-	connector: K;
-	key: keyof Options.ConnectorOptions[K];
 }) {
-	const { options, setOptions, i18ntitle, i18nlabel, connector, key } = props;
+	const { options, setOptions } = props;
 	return (
-		<li>
-			<Checkbox
-				title={t(i18ntitle)}
-				label={t(i18nlabel)}
-				isChecked={() => options()?.[connector]?.[key] as boolean}
-				onInput={(e) => {
+		<>
+			<h2>{t('optionsScrobbleBehavior')}</h2>
+			<RadioButtons
+				buttons={[
+					{
+						label: t('optionForceRecognize'),
+						title: t('optionForceRecognizeTitle'),
+						value: Options.FORCE_RECOGNIZE,
+					},
+					{
+						label: t('optionScrobbleRecognizedTracks'),
+						title: t('optionScrobbleRecognizedTracksTitle'),
+						value: Options.SCROBBLE_RECOGNIZED_TRACKS,
+					},
+					{
+						label: t('optionScrobbleEditedTracksOnly'),
+						title: t('optionScrobbleEditedTracksOnlyTitle'),
+						value: Options.SCROBBLE_EDITED_TRACKS_ONLY,
+					},
+				]}
+				name="scrobbleBehavior"
+				value={() => {
+					if (options()?.[Options.FORCE_RECOGNIZE]) {
+						return Options.FORCE_RECOGNIZE;
+					}
+					if (options()?.[Options.SCROBBLE_EDITED_TRACKS_ONLY]) {
+						return Options.SCROBBLE_EDITED_TRACKS_ONLY;
+					}
+					return Options.SCROBBLE_RECOGNIZED_TRACKS;
+				}}
+				onChange={(e) => {
+					const value = e.currentTarget.value;
 					setOptions.mutate((o) => {
 						if (!o) return o;
 						const newOptions = {
 							...o,
-							[connector]: {
-								...o[connector],
-								[key]: e.currentTarget.checked,
-							},
+							[Options.FORCE_RECOGNIZE]:
+								value === Options.FORCE_RECOGNIZE,
+							[Options.SCROBBLE_EDITED_TRACKS_ONLY]:
+								value === Options.SCROBBLE_EDITED_TRACKS_ONLY,
+							[Options.SCROBBLE_RECOGNIZED_TRACKS]:
+								value === Options.SCROBBLE_RECOGNIZED_TRACKS,
 						};
-						connectorOptions.set(newOptions);
+						globalOptions.set(newOptions);
 						return newOptions;
 					});
 				}}
 			/>
-		</li>
+		</>
 	);
 }
 
@@ -174,6 +132,25 @@ function ConnectorOptionsList() {
 				<ConnectorOptionEntry
 					options={options}
 					setOptions={setOptions}
+					connectorOptions={connectorOptions}
+					i18ntitle="optionYtMusicRecognisedOnlyTitle"
+					i18nlabel="optionYtMusicRecognisedOnly"
+					connector="YouTube"
+					key="scrobbleMusicRecognisedOnly"
+				/>
+				<ConnectorOptionEntry
+					options={options}
+					setOptions={setOptions}
+					connectorOptions={connectorOptions}
+					i18ntitle="optionYtGetTrackInfoFromYtMusicTitle"
+					i18nlabel="optionYtGetTrackInfoFromYtMusic"
+					connector="YouTube"
+					key="enableGetTrackInfoFromYtMusic"
+				/>
+				<ConnectorOptionEntry
+					options={options}
+					setOptions={setOptions}
+					connectorOptions={connectorOptions}
 					i18ntitle="optionYtMusicOnlyTitle"
 					i18nlabel="optionYtMusicOnly"
 					connector="YouTube"
@@ -182,54 +159,26 @@ function ConnectorOptionsList() {
 				<ConnectorOptionEntry
 					options={options}
 					setOptions={setOptions}
+					connectorOptions={connectorOptions}
 					i18ntitle="optionYtEntertainmentOnlyTitle"
 					i18nlabel="optionYtEntertainmentOnly"
 					connector="YouTube"
 					key="scrobbleEntertainmentOnly"
 				/>
+				<li class={styles.muted}>{t('optionYtDesc')}</li>
 			</ul>
-			<p class={styles.muted}>{t('optionYtDesc')}</p>
 		</>
 	);
 }
 
-function GlobalOptionEntry(props: {
+function GlobalOptionsList(props: {
 	options: Resource<Options.GlobalOptions | null>;
 	setOptions: ResourceActions<
 		Options.GlobalOptions | null | undefined,
 		unknown
 	>;
-	i18ntitle: string;
-	i18nlabel: string;
-	key: keyof Options.GlobalOptions;
 }) {
-	const { options, setOptions, i18ntitle, i18nlabel, key } = props;
-	return (
-		<li>
-			<Checkbox
-				title={t(i18ntitle)}
-				label={t(i18nlabel)}
-				isChecked={() => options()?.[key] as boolean}
-				onInput={(e) => {
-					setOptions.mutate((o) => {
-						if (!o) return o;
-						const newOptions = {
-							...o,
-							[key]: e.currentTarget.checked,
-						};
-						globalOptions.set(newOptions);
-						return newOptions;
-					});
-				}}
-			/>
-		</li>
-	);
-}
-
-function GlobalOptionsList() {
-	const [options, setOptions] = createResource(
-		globalOptions.get.bind(globalOptions)
-	);
+	const { options, setOptions } = props;
 	return (
 		<>
 			<h2>{t('optionsGeneral')}</h2>
@@ -237,6 +186,7 @@ function GlobalOptionsList() {
 				<GlobalOptionEntry
 					options={options}
 					setOptions={setOptions}
+					globalOptions={globalOptions}
 					i18ntitle="optionUseNotificationsTitle"
 					i18nlabel="optionUseNotifications"
 					key={Options.USE_NOTIFICATIONS}
@@ -244,6 +194,7 @@ function GlobalOptionsList() {
 				<GlobalOptionEntry
 					options={options}
 					setOptions={setOptions}
+					globalOptions={globalOptions}
 					i18ntitle="optionUnrecognizedNotificationsTitle"
 					i18nlabel="optionUnrecognizedNotifications"
 					key={Options.USE_UNRECOGNIZED_SONG_NOTIFICATIONS}
@@ -251,13 +202,7 @@ function GlobalOptionsList() {
 				<GlobalOptionEntry
 					options={options}
 					setOptions={setOptions}
-					i18ntitle="optionForceRecognizeTitle"
-					i18nlabel="optionForceRecognize"
-					key={Options.FORCE_RECOGNIZE}
-				/>
-				<GlobalOptionEntry
-					options={options}
-					setOptions={setOptions}
+					globalOptions={globalOptions}
 					i18ntitle="optionScrobblePodcastsTitle"
 					i18nlabel="optionScrobblePodcasts"
 					key={Options.SCROBBLE_PODCASTS}
@@ -610,20 +555,97 @@ function ConnectorOverrideOptionDetails(props: {
 				setOverrideOptions={setOverrideOptions}
 			/>
 			<ConnectorTripleCheckbox
-				title={t('optionForceRecognizeTitle')}
-				label={t('optionForceRecognize')}
-				connector={connector}
-				option={Options.FORCE_RECOGNIZE}
-				overrideOptions={overrideOptions}
-				setOverrideOptions={setOverrideOptions}
-			/>
-			<ConnectorTripleCheckbox
 				title={t('optionScrobblePodcastsTitle')}
 				label={t('optionScrobblePodcasts')}
 				connector={connector}
 				option={Options.SCROBBLE_PODCASTS}
 				overrideOptions={overrideOptions}
 				setOverrideOptions={setOverrideOptions}
+			/>
+			<h3>{t('optionsScrobbleBehavior')}</h3>
+			<RadioButtons
+				buttons={[
+					{
+						label: t('optionForceRecognize'),
+						title: t('optionForceRecognizeTitle'),
+						value: Options.FORCE_RECOGNIZE,
+					},
+					{
+						label: t('optionScrobbleRecognizedTracks'),
+						title: t('optionScrobbleRecognizedTracksTitle'),
+						value: Options.SCROBBLE_RECOGNIZED_TRACKS,
+					},
+					{
+						label: t('optionScrobbleEditedTracksOnly'),
+						title: t('optionScrobbleEditedTracksOnlyTitle'),
+						value: Options.SCROBBLE_EDITED_TRACKS_ONLY,
+					},
+				]}
+				name={`${connector.id}-scrobbleBehavior`}
+				value={() => {
+					if (
+						overrideOptions()?.[connector.id]?.[
+							Options.FORCE_RECOGNIZE
+						]
+					) {
+						return Options.FORCE_RECOGNIZE;
+					}
+					if (
+						overrideOptions()?.[connector.id]?.[
+							Options.SCROBBLE_EDITED_TRACKS_ONLY
+						]
+					) {
+						return Options.SCROBBLE_EDITED_TRACKS_ONLY;
+					}
+					if (
+						overrideOptions()?.[connector.id]?.[
+							Options.SCROBBLE_RECOGNIZED_TRACKS
+						]
+					) {
+						return Options.SCROBBLE_RECOGNIZED_TRACKS;
+					}
+
+					return '';
+				}}
+				onChange={(e) => {
+					const value = e.currentTarget.value;
+					setOverrideOptions.mutate((o) => {
+						const newOptions = {
+							...(o ?? {}),
+						};
+						newOptions[connector.id] = {
+							...(newOptions[connector.id] ?? {}),
+							[Options.FORCE_RECOGNIZE]:
+								value === Options.FORCE_RECOGNIZE,
+							[Options.SCROBBLE_EDITED_TRACKS_ONLY]:
+								value === Options.SCROBBLE_EDITED_TRACKS_ONLY,
+							[Options.SCROBBLE_RECOGNIZED_TRACKS]:
+								value === Options.SCROBBLE_RECOGNIZED_TRACKS,
+						};
+
+						connectorOverrideOptions.set(newOptions);
+						return newOptions;
+					});
+				}}
+				reset={() => {
+					setOverrideOptions.mutate((o) => {
+						const newOptions = {
+							...(o ?? {}),
+						};
+						delete newOptions[connector.id][
+							Options.FORCE_RECOGNIZE
+						];
+						delete newOptions[connector.id][
+							Options.SCROBBLE_EDITED_TRACKS_ONLY
+						];
+						delete newOptions[connector.id][
+							Options.SCROBBLE_RECOGNIZED_TRACKS
+						];
+
+						connectorOverrideOptions.set(newOptions);
+						return newOptions;
+					});
+				}}
 			/>
 			<h3>{t('customPatterns')}</h3>
 			<p>{t('customPatternsHint')}</p>
@@ -767,93 +789,5 @@ function ConnectorTripleCheckbox(props: {
 				});
 			}}
 		/>
-	);
-}
-
-enum TripleCheckboxState {
-	Unchecked,
-	Checked,
-	Indeterminate,
-}
-
-function TripleCheckbox(props: {
-	title: string;
-	label: string;
-	id: string;
-	state: () => TripleCheckboxState;
-	onInput: (state: TripleCheckboxState) => void;
-}) {
-	const { title, label, id, state, onInput } = props;
-	return (
-		<div class={styles.tripleCheckboxOption}>
-			<span title={title}>
-				{label}
-				<div class={styles.tripleCheckboxWrapper}>
-					<label
-						class={`${styles.tripleCheckboxLabel} ${
-							styles.unchecked
-						}${
-							state() === TripleCheckboxState.Unchecked
-								? ` ${styles.activeBox}`
-								: ''
-						}`}
-					>
-						<input
-							class={styles.tripleCheckbox}
-							type="radio"
-							value="unchecked"
-							name={`${id}-${label}`}
-							checked={state() === TripleCheckboxState.Unchecked}
-							onInput={() =>
-								onInput(TripleCheckboxState.Unchecked)
-							}
-						/>
-						<Close />
-					</label>
-					<label
-						class={`${styles.tripleCheckboxLabel} ${
-							styles.indeterminate
-						}${
-							state() === TripleCheckboxState.Indeterminate
-								? ` ${styles.activeBox}`
-								: ''
-						}`}
-					>
-						<input
-							class={styles.tripleCheckbox}
-							type="radio"
-							value="indeterminate"
-							name={`${id}-${label}`}
-							checked={
-								state() === TripleCheckboxState.Indeterminate
-							}
-							onInput={() =>
-								onInput(TripleCheckboxState.Indeterminate)
-							}
-						/>
-						<IndeterminateCheckBox />
-					</label>
-					<label
-						class={`${styles.tripleCheckboxLabel} ${
-							styles.checked
-						}${
-							state() === TripleCheckboxState.Checked
-								? ` ${styles.activeBox}`
-								: ''
-						}`}
-					>
-						<input
-							class={styles.tripleCheckbox}
-							type="radio"
-							value="checked"
-							name={`${id}-${label}`}
-							checked={state() === TripleCheckboxState.Checked}
-							onInput={() => onInput(TripleCheckboxState.Checked)}
-						/>
-						<Check />
-					</label>
-				</div>
-			</span>
-		</div>
 	);
 }

@@ -19,7 +19,8 @@
 .linkButton,
 .editButton,
 .deleteEditButton,
-.patternAddButton {
+.patternAddButton,
+.resetButton {
 	border-radius: 3px;
 }
 
@@ -27,7 +28,8 @@
 .editButton,
 .deleteEditButton,
 .patternDeleteButton,
-.patternAddButton {
+.patternAddButton,
+.resetButton {
 	align-items: center;
 	background-color: var(--always-last-fm);
 	border: none;
@@ -51,7 +53,8 @@
 
 .linkButton,
 .editButton,
-.patternAddButton {
+.patternAddButton,
+.resetButton {
 	font-size: 1.2em;
 	padding: 0.5em 1em;
 	white-space: nowrap;
@@ -137,8 +140,8 @@ ul {
 	$tickOffset: calc(($checkboxSize - $tickSize) / 2);
 
 	input {
+		-webkit-appearance: none;
 		appearance: none;
-		--webkit-appearance: none;
 	}
 
 	.checkboxWrapper {
@@ -201,7 +204,7 @@ ul {
 
 .connectorOptionsList {
 	summary,
-	li:first-child {
+	& > li:first-child {
 		align-items: center;
 		display: flex;
 		gap: 0.5em;
@@ -313,5 +316,34 @@ summary {
 
 	&::-webkit-details-marker {
 		display: none;
+	}
+}
+
+.radioButtons {
+
+	li {
+		margin-bottom: 1em;
+	}
+
+	input {
+		-webkit-appearance: none;
+		appearance: none;
+		margin: 0;
+	}
+
+	.radioLabel {
+		background-color: var(--background);
+		border-radius: 0.5em;
+		color: var(--text);
+		cursor: pointer;
+		display: inline-block;
+		font-size: 1.2em;
+		padding: 0.5em 1em;
+	}
+
+	.radioLabel:hover,
+	input:checked + .radioLabel {
+		background-color: var(--last-fm);
+		color: var(--always-light);
 	}
 }

@@ -8,6 +8,7 @@ import BaseScrobbler, { SessionData } from '@/scrobbler/base-scrobbler';
 import {
 	ListenBrainzParams,
 	ListenBrainzTrackMeta,
+	MetadataLookup,
 } from './listenbrainz.types';
 
 /**
@@ -15,16 +16,13 @@ import {
  */
 
 const listenBrainzTokenPage = 'https://listenbrainz.org/profile/';
-const apiUrl = 'https://api.listenbrainz.org/1/submit-listens';
+const baseUrl = 'https://api.listenbrainz.org/1';
+const apiUrl = `${baseUrl}/submit-listens`;
 export default class ListenBrainzScrobbler extends BaseScrobbler<'ListenBrainz'> {
 	public userApiUrl!: string;
 	public userToken!: string;
 	/** Can't find where this value is being set from */
 	private authUrl!: string;
-
-	public async toggleLove(): Promise<Record<string, never>> {
-		return Promise.resolve({});
-	}
 
 	public async getSongInfo(): Promise<Record<string, never>> {
 		return Promise.resolve({});
@@ -169,7 +167,7 @@ export default class ListenBrainzScrobbler extends BaseScrobbler<'ListenBrainz'>
 				},
 			],
 		} as ListenBrainzParams;
-		return this.sendRequest(params, sessionID);
+		return this.sendScrobbleRequest(params, sessionID);
 	}
 
 	/** @override */
@@ -185,26 +183,92 @@ export default class ListenBrainzScrobbler extends BaseScrobbler<'ListenBrainz'>
 				},
 			],
 		} as ListenBrainzParams;
-		return this.sendRequest(params, sessionID);
+		return this.sendScrobbleRequest(params, sessionID);
+	}
+
+	/** @override */
+	async toggleLove(song: Song, isLoved: boolean) {
+		// https://listenbrainz.readthedocs.io/en/latest/users/api-usage.html#lookup-mbids
+		const track = song.getTrack();
+		const artist = song.getArtist();
+		if (typeof track !== 'string' || typeof artist !== 'string') {
+			throw new Error(
+				`Invalid track ${JSON.stringify({ artist, track })}`
+			);
+		}
+		const lookupRequestParams = new URLSearchParams({
+			recording_name: track,
+			artist_name: artist,
+		});
+
+		let lookupResult: MetadataLookup = {};
+
+		try {
+			lookupResult = await this.listenBrainzApi<MetadataLookup>(
+				'GET',
+				`${baseUrl}/metadata/lookup?${lookupRequestParams}`,
+				null,
+				null
+			);
+		} catch (e) {}
+
+		this.debugLog(
+			`lookup result: ${JSON.stringify(lookupResult, null, 2)}`
+		);
+
+		if (!lookupResult.recording_mbid) {
+			this.debugLog(`Could not lookup metadata for song: ${song}`);
+			return {};
+		}
+
+		// https://listenbrainz.readthedocs.io/en/latest/users/api-usage.html#love-hate-feedback
+		const { sessionID } = await this.getSession();
+		const loveRequestBody = {
+			recording_mbid: lookupResult.recording_mbid,
+			score: isLoved ? 1 : 0,
+		};
+		const loveResult = await this.listenBrainzApi(
+			'POST',
+			`${baseUrl}/feedback/recording-feedback`,
+			loveRequestBody,
+			sessionID
+		);
+
+		return this.processResult(loveResult);
+	}
+
+	/** @override */
+	canLoveSong() {
+		return true;
 	}
 
 	/** Private methods. */
 
-	private async sendRequest<
+	private async listenBrainzApi<
 		T extends Record<string, unknown> = Record<string, unknown>
 	>(
-		params: ListenBrainzParams,
-		sessionID: string
-	): Promise<ServiceCallResult> {
-		const requestInfo = {
-			method: 'POST',
+		method: string,
+		url: string,
+		body: ListenBrainzParams | null,
+		sessionID: string | null
+	): Promise<T> {
+		const requestInfo: RequestInit = {
+			method,
 			headers: {
-				Authorization: `Token ${sessionID}`,
 				'Content-Type': 'application/json; charset=UTF-8',
 			},
-			body: JSON.stringify(params),
 		};
-		const promise = fetch(this.userApiUrl || apiUrl, requestInfo);
+
+		if (body) {
+			requestInfo.body = JSON.stringify(body);
+		}
+
+		if (sessionID && requestInfo.headers) {
+			(
+				requestInfo.headers as Record<string, string>
+			).Authorization = `Token ${sessionID}`;
+		}
+		const promise = fetch(url, requestInfo);
 		const timeout = this.REQUEST_TIMEOUT;
 
 		let result: T | null = null;
@@ -229,7 +293,22 @@ export default class ListenBrainzScrobbler extends BaseScrobbler<'ListenBrainz'>
 
 		this.debugLog(JSON.stringify(result, null, 2));
 
-		return this.processResponse(result);
+		return result;
+	}
+
+	async sendScrobbleRequest<
+		T extends Record<string, unknown> = Record<string, unknown>
+	>(
+		params: ListenBrainzParams,
+		sessionID: string
+	): Promise<ServiceCallResult> {
+		const result = await this.listenBrainzApi(
+			'POST',
+			this.userApiUrl || apiUrl,
+			params,
+			sessionID
+		);
+		return this.processResult(result);
 	}
 
 	private async requestSession() {
@@ -297,9 +376,7 @@ export default class ListenBrainzScrobbler extends BaseScrobbler<'ListenBrainz'>
 		return null;
 	}
 
-	private processResponse(
-		result: Record<string, unknown>
-	): ServiceCallResult {
+	private processResult(result: Record<string, unknown>): ServiceCallResult {
 		if (result.status !== 'ok') {
 			return ServiceCallResult.ERROR_OTHER;
 		}

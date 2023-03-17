@@ -66,9 +66,14 @@ export async function process(
 		Options.FORCE_RECOGNIZE,
 		connector.id
 	);
-	if (typeof forceRecognize === 'boolean') {
-		song.flags.isValid = isSongValid || forceRecognize;
-	}
+	const scrobbleEditedTracksOnly = await Options.getOption(
+		Options.SCROBBLE_EDITED_TRACKS_ONLY,
+		connector.id
+	);
+
+	song.flags.isValid =
+		(isSongValid || (forceRecognize ?? false)) &&
+		(song.flags.isCorrectedByUser || !scrobbleEditedTracksOnly);
 }
 
 /**

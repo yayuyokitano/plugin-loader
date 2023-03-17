@@ -578,8 +578,8 @@ export async function getOption(
 
 /**
  * Normalize given URL. Currently it only normalizes
- * protocol-relative links.
- * @param url - URL, which is possibly protocol-relative
+ * protocol-relative and root-relative links.
+ * @param url - URL, which is possibly relative
  * @returns Normalized URL
  */
 /* istanbul ignore next */
@@ -588,7 +588,15 @@ export function normalizeUrl(url: string | null | undefined): string | null {
 		return null;
 	}
 
-	return url.startsWith('//') ? location.protocol + url : url;
+	if (url.startsWith('//')) {
+		return location.protocol + url;
+	}
+
+	if (url.match(/^\/(?!\/)/g)) {
+		return location.origin + url;
+	}
+
+	return url;
 }
 
 /**
@@ -672,7 +680,7 @@ export function processYtVideoTitle(
 	}
 
 	// Remove [genre] or 【genre】 from the beginning of the title
-	let title = videoTitle.replace(/^((\[[^\]]+])|(【[^】]+】))\s*-*\s*/i, '');
+	let title = videoTitle.replace(/^((\[[^\]]+\])|(【[^】]+】))\s*-*\s*/i, '');
 
 	// Remove track (CD and vinyl) numbers from the beginning of the title
 	title = title.replace(/^\s*([a-zA-Z]{1,2}|[0-9]{1,2})[1-9]?\.\s+/i, '');

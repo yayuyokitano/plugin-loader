@@ -3,7 +3,7 @@ import pkg from './package.json';
 
 export const common: Manifest.WebExtensionManifest = {
 	manifest_version: 3,
-	name: 'Plugin Loader',
+	name: 'Web Scrobbler',
 	default_locale: 'en',
 	description: '__MSG_extDescription__',
 	version: pkg.version,

@@ -9,14 +9,15 @@ const connectorsOverrideOptions = BrowserStorage.getStorage(
 	BrowserStorage.CONNECTORS_OVERRIDE_OPTIONS
 );
 
-export const FORCE_RECOGNIZE = 'forceRecognize';
 export const USE_NOTIFICATIONS = 'useNotifications';
-export const SCROBBLE_PERCENT = 'scrobblePercent';
-export const DISABLED_CONNECTORS = 'disabledConnectors';
 export const USE_UNRECOGNIZED_SONG_NOTIFICATIONS =
 	'useUnrecognizedSongNotifications';
 export const SCROBBLE_PODCASTS = 'scrobblePodcasts';
-export const DISABLE_GA = 'disableGa';
+export const FORCE_RECOGNIZE = 'forceRecognize';
+export const SCROBBLE_RECOGNIZED_TRACKS = 'scrobbleRecognizedTracks';
+export const SCROBBLE_EDITED_TRACKS_ONLY = 'scrobbleEditedTracksOnly';
+export const SCROBBLE_PERCENT = 'scrobblePercent';
+export const DISABLED_CONNECTORS = 'disabledConnectors';
 
 export interface GlobalOptions {
 	/**
@@ -47,14 +48,19 @@ export interface GlobalOptions {
 	[USE_UNRECOGNIZED_SONG_NOTIFICATIONS]: boolean;
 
 	/**
+	 * Only scrobble tracks if they are recognized or edited.
+	 */
+	[SCROBBLE_RECOGNIZED_TRACKS]: boolean;
+
+	/**
+	 * Only scrobble tracks if they are edited.
+	 */
+	[SCROBBLE_EDITED_TRACKS_ONLY]: boolean;
+
+	/**
 	 * Scrobble podcast episodes.
 	 */
 	[SCROBBLE_PODCASTS]: boolean;
-
-	/**
-	 * Disable Google Analytics.
-	 */
-	[DISABLE_GA]: boolean;
 }
 
 /**
@@ -65,13 +71,16 @@ const DEFAULT_OPTIONS: GlobalOptions = {
 	[SCROBBLE_PODCASTS]: true,
 	[USE_NOTIFICATIONS]: true,
 	[USE_UNRECOGNIZED_SONG_NOTIFICATIONS]: false,
+	[SCROBBLE_RECOGNIZED_TRACKS]: true,
+	[SCROBBLE_EDITED_TRACKS_ONLY]: false,
 	[SCROBBLE_PERCENT]: 50,
 	[DISABLED_CONNECTORS]: {},
-	[DISABLE_GA]: true,
 };
 
 const OVERRIDE_CONTENT = {
 	[FORCE_RECOGNIZE]: false,
+	[SCROBBLE_RECOGNIZED_TRACKS]: true,
+	[SCROBBLE_EDITED_TRACKS_ONLY]: false,
 	[SCROBBLE_PODCASTS]: true,
 	[USE_NOTIFICATIONS]: true,
 	[USE_UNRECOGNIZED_SONG_NOTIFICATIONS]: false,
@@ -81,6 +90,8 @@ export interface ConnectorOptions {
 	YouTube: {
 		scrobbleMusicOnly: boolean;
 		scrobbleEntertainmentOnly: boolean;
+		scrobbleMusicRecognisedOnly: boolean;
+		enableGetTrackInfoFromYtMusic: boolean;
 	};
 }
 
@@ -91,6 +102,8 @@ const DEFAULT_CONNECTOR_OPTIONS: ConnectorOptions = {
 	YouTube: {
 		scrobbleMusicOnly: false,
 		scrobbleEntertainmentOnly: false,
+		scrobbleMusicRecognisedOnly: false,
+		enableGetTrackInfoFromYtMusic: false,
 	},
 };
 
@@ -99,6 +112,8 @@ export interface ConnectorsOverrideOptionValues {
 	[USE_NOTIFICATIONS]?: boolean;
 	[SCROBBLE_PODCASTS]?: boolean;
 	[USE_UNRECOGNIZED_SONG_NOTIFICATIONS]?: boolean;
+	[SCROBBLE_RECOGNIZED_TRACKS]?: boolean;
+	[SCROBBLE_EDITED_TRACKS_ONLY]?: boolean;
 }
 
 export interface ConnectorsOverrideOptions {
