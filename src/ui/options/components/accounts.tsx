@@ -1,12 +1,39 @@
 import { t } from '@/util/i18n';
-import { ScrobblerModels } from '@/storage/wrapper';
 import ScrobbleService, {
 	Scrobbler,
 	ScrobblerLabel,
 } from '@/object/scrobble-service';
-import { ErrorBoundary, Show, createResource, onCleanup } from 'solid-js';
+import { ErrorBoundary, For, Show, createResource, onCleanup } from 'solid-js';
 import styles from './components.module.scss';
 import browser from 'webextension-polyfill';
+import { debugLog } from '@/util/util';
+
+const scrobblerPropertiesMap = {
+	ListenBrainz: {
+		userApiUrl: {
+			type: 'text',
+			title: 'accountsUserApiUrl',
+			placeholder: 'accountsUserApiUrlPlaceholder',
+		},
+		userToken: {
+			type: 'password',
+			title: 'accountsUserToken',
+			placeholder: 'accountsUserTokenPlaceholder',
+		},
+	},
+	Maloja: {
+		userApiUrl: {
+			type: 'text',
+			title: 'accountsUserApiUrl',
+			placeholder: 'accountsUserApiUrlPlaceholder',
+		},
+		userToken: {
+			type: 'password',
+			title: 'accountsUserToken',
+			placeholder: 'accountsUserTokenPlaceholder',
+		},
+	},
+};
 
 export default function Accounts() {
 	return (
@@ -32,10 +59,18 @@ function ScrobblerDisplay(props: { label: ScrobblerLabel }) {
 	);
 
 	const onFocus = async () => {
-		if (await rawScrobbler.isReadyForGrantAccess()) {
-			await rawScrobbler.getSession();
-			setSession.refetch();
-			setProfileUrl.refetch();
+		try {
+			if (await rawScrobbler.isReadyForGrantAccess()) {
+				await rawScrobbler.getSession();
+				setSession.refetch();
+				setProfileUrl.refetch();
+			}
+		} catch (err) {
+			debugLog(
+				`${rawScrobbler.getLabel()}: Error while fetching session`,
+				'warn'
+			);
+			debugLog(err, 'warn');
 		}
 	};
 	window.addEventListener('focus', onFocus);
@@ -43,23 +78,18 @@ function ScrobblerDisplay(props: { label: ScrobblerLabel }) {
 
 	return (
 		<>
-			<ErrorBoundary
-				fallback={(err) => {
-					console.error(err);
-					return <SignedOut scrobbler={rawScrobbler} />;
-				}}
-			>
-				<Show when={session()}>
-					<h2>{rawScrobbler.getLabel()}</h2>
-					<p>
-						{t(
-							'accountsSignedInAs',
-							session()?.sessionName || 'anonymous'
-						)}
-					</p>
+			<Show when={!session.error && session()}>
+				<h2>{rawScrobbler.getLabel()}</h2>
+				<p>
+					{t(
+						'accountsSignedInAs',
+						session()?.sessionName || 'anonymous'
+					)}
+				</p>
+				<div class={styles.buttonContainer}>
 					<a
 						class={styles.linkButton}
-						href={profileUrl()}
+						href={profileUrl.error ? '#' : profileUrl()}
 						target="_blank"
 						rel="noopener noreferrer"
 					>
@@ -75,11 +105,12 @@ function ScrobblerDisplay(props: { label: ScrobblerLabel }) {
 					>
 						{t('accountsSignOut')}
 					</button>
-				</Show>
-				<Show when={!session()}>
-					<SignedOut scrobbler={rawScrobbler} />
-				</Show>
-			</ErrorBoundary>
+				</div>
+				<Properties scrobbler={rawScrobbler} />
+			</Show>
+			<Show when={session.error || !session()}>
+				<SignedOut scrobbler={rawScrobbler} />
+			</Show>
 		</>
 	);
 }
@@ -100,6 +131,52 @@ function SignedOut(props: { scrobbler: Scrobbler }) {
 			>
 				{t('accountsSignIn')}
 			</button>
+			<Properties scrobbler={scrobbler} />
 		</>
 	);
+}
+
+function Properties(props: { scrobbler: Scrobbler }) {
+	const { scrobbler } = props;
+	const label = scrobbler.getLabel();
+	if (!labelHasProperties(label)) return <></>;
+	const [properties, setProperties] = createResource(
+		scrobbler.getUserProperties.bind(scrobbler)
+	);
+	return (
+		<>
+			<h3>{t('accountsScrobblerProps')}</h3>
+			<For each={Object.entries(scrobblerPropertiesMap[label])}>
+				{([key, { type, title, placeholder }]) => {
+					const typedKey =
+						key as keyof (typeof scrobblerPropertiesMap)[typeof label];
+					return (
+						<label class={styles.propLabel}>
+							{t(title)}
+							<input
+								class={styles.propInput}
+								type={type}
+								value={properties()?.[typedKey] || ''}
+								placeholder={t(placeholder)}
+								onInput={(e) => {
+									setProperties.mutate((o) => {
+										if (!o) o = {};
+										o[typedKey] = e.currentTarget.value;
+										scrobbler.applyUserProperties(o);
+										return o;
+									});
+								}}
+							/>
+						</label>
+					);
+				}}
+			</For>
+		</>
+	);
+}
+
+function labelHasProperties(
+	label: ScrobblerLabel
+): label is keyof typeof scrobblerPropertiesMap {
+	return label in scrobblerPropertiesMap;
 }

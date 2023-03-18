@@ -3,11 +3,12 @@
 import { DebugLogType, debugLog } from '@/util/util';
 import Song from '@/object/song';
 import { ServiceCallResult } from '@/object/service-call-result';
-import StorageWrapper, { DataModels } from '@/storage/wrapper';
+import StorageWrapper, { DataModels, ScrobblerModels } from '@/storage/wrapper';
 import {
 	StorageNamespace,
 	getScrobblerStorage,
 } from '../storage/browser-storage';
+import { ScrobblerLabel } from '@/object/scrobble-service';
 
 export interface SessionData {
 	/** ID of a current session */
@@ -52,7 +53,7 @@ export interface ScrobblerSongInfo {
  * Basic implementation relies on session data stored in the storage as it
  * described above.
  */
-export default abstract class BaseScrobbler<K extends keyof DataModels> {
+export default abstract class BaseScrobbler<K extends keyof ScrobblerModels> {
 	protected storage: StorageWrapper<K>;
 	public userApiUrl: string | null = null;
 	public userToken: string | null = null;
@@ -60,6 +61,26 @@ export default abstract class BaseScrobbler<K extends keyof DataModels> {
 	constructor() {
 		this.storage = this.initStorage();
 		void this.initUserProps();
+	}
+
+	/**
+	 * Get user property values.
+	 *
+	 * Each property is a property used internally in scrobblers.
+	 * Users can edit custom properties in the extension settings.
+	 */
+	public async getUserProperties(): Promise<
+		| Record<string, never>
+		| {
+				userApiUrl: string;
+				userToken: string;
+		  }
+	> {
+		const storage = await this.storage.get();
+		if (!storage || !('properties' in storage) || !storage.properties) {
+			return {} as Record<string, never>;
+		}
+		return storage.properties;
 	}
 
 	/**
@@ -75,8 +96,12 @@ export default abstract class BaseScrobbler<K extends keyof DataModels> {
 	): Promise<void> {
 		this.applyProps(props, this.getUsedDefinedProperties());
 
-		const data = await this.storage.get();
+		let data = await this.storage.get();
 
+		if (!data) {
+			data = {};
+		}
+		// this is weird we're just helping typescript out
 		if (!data) {
 			debugLog('No data in storage', 'error');
 			return;
@@ -87,6 +112,7 @@ export default abstract class BaseScrobbler<K extends keyof DataModels> {
 			(data as any).properties = {};
 		}
 
+		// this is weird we're just helping typescript out
 		if (!('properties' in data) || data.properties === undefined) {
 			debugLog('No properties in storage', 'error');
 			return;

@@ -41,7 +41,7 @@ export type DebugLogType = 'log' | 'error' | 'warn' | 'info';
  * @param text - Debug message
  * @param logType - Log type
  */
-export function debugLog(text: string, logType: DebugLogType = 'log'): void {
+export function debugLog(text: unknown, logType: DebugLogType = 'log'): void {
 	const logFunc = console[logType];
 
 	if (typeof logFunc !== 'function') {

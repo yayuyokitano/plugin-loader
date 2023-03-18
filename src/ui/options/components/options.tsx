@@ -221,7 +221,7 @@ function EditedTracks(props: {
 		<>
 			<h2>{t('optionsEditedTracks')}</h2>
 			<p>{t('optionsEditedTracksDesc')}</p>
-			<div class={styles.editButtons}>
+			<div class={styles.buttonContainer}>
 				<ViewEdits setActiveModal={setActiveModal} modal={modal} />
 				<ExportEdits />
 				<ImportEdits />

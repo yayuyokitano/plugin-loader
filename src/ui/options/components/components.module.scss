@@ -11,7 +11,7 @@
 	}
 }
 
-.editButtons {
+.buttonContainer {
 	display: flex;
 	gap: 0.5em;
 }
@@ -346,4 +346,20 @@ summary {
 		background-color: var(--last-fm);
 		color: var(--always-light);
 	}
+}
+
+.propLabel {
+	display: block;
+	font-size: 1em;
+	margin-bottom: 0.5em;
+}
+
+.propInput {
+	background-color: var(--background);
+	border: none;
+	border-radius: 0.5em;
+	color: var(--text);
+	font-size: 1em;
+	margin-left: 0.5em;
+	padding: 0.25em 0.5em;
 }
