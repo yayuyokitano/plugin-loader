@@ -1,5 +1,7 @@
 .alertPopup {
+	padding: 15px;
 	text-align: center;
+	width: 300px;
 
 	p {
 		text-align: left;
@@ -13,6 +15,8 @@
 body {
 	background-color: var(--background);
 	color: var(--text);
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 14px;
 	margin: 0;
 	padding: 0;
 }
@@ -22,7 +26,26 @@ a {
 	text-decoration: none;
 }
 
-.popup {
-	padding: 15px;
-	width: 300px;
+.centered {
+	margin: 0 auto;
+}
+
+.alreadyPlaying {
+	summary {
+		align-items: center;
+		cursor: pointer;
+		display: flex;
+		gap: 0.5em;
+		width: 100%;
+	}
+
+	.expandVector {
+		transition: transform 0.2s ease-in-out;
+	}
+
+	&[open] {
+		.expandVector {
+			transform: rotate(-180deg);
+		}
+	}
 }

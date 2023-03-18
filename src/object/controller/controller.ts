@@ -90,7 +90,7 @@ export default class Controller {
 	public onSongUpdated(): void {
 		sendContentMessage({
 			type: 'songUpdate',
-			payload: this.currentSong,
+			payload: this.currentSong?.getCloneableData() ?? null,
 		});
 	}
 
@@ -111,6 +111,7 @@ export default class Controller {
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- to be overridden
 	public onControllerEvent(event: string): void {
+		console.log(event);
 		// do nothing
 	}
 
@@ -312,10 +313,7 @@ export default class Controller {
 		 * clear any previous song and its bindings.
 		 */
 		this.resetState();
-		this.currentSong = new Song(
-			newState as Record<string, string>,
-			this.connector
-		);
+		this.currentSong = new Song(newState, this.connector);
 		this.currentSong.flags.isReplaying = this.isReplayingSong;
 
 		this.debugLog(

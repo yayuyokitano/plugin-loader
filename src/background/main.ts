@@ -4,15 +4,13 @@ import * as BrowserStorage from '@/storage/browser-storage';
 import { ManagerTab } from '@/storage/wrapper';
 import {
 	backgroundListener,
+	sendPopupMessage,
 	setupBackgroundListeners,
 } from '@/util/communication';
 import browser from 'webextension-polyfill';
-import { filterAsync } from './util';
-import {
-	ControllerModeStr,
-	controllerModePriority,
-} from '@/object/controller/controller';
-import Song from '@/object/song';
+import { fetchTab, filterInactiveTabs, getCurrentTab } from './util';
+import { ControllerModeStr } from '@/object/controller/controller';
+import Song, { CloneableSong } from '@/object/song';
 import { t } from '@/util/i18n';
 
 const state = BrowserStorage.getStorage(BrowserStorage.STATE_MANAGEMENT);
@@ -22,23 +20,9 @@ browser.runtime.onStartup.addListener(() => {
 	});
 });
 
-async function filterInactiveTabs(activeTabs: ManagerTab[]) {
-	return filterAsync(activeTabs, async (entry) => {
-		try {
-			if (entry.mode === ControllerMode.Unsupported) {
-				return false;
-			}
-			const tab = await browser.tabs.get(entry.tabId);
-			const connector = await getConnectorByUrl(tab.url ?? '');
-			return connector !== null;
-		} catch (err) {
-			return false;
-		}
-	});
-}
-
 browser.tabs.onRemoved.addListener(async () => {
-	const { activeTabs } = (await state.get()) ?? { activeTabs: [] };
+	const activeTabs = await fetchTab();
+
 	await state.set({
 		activeTabs: await filterInactiveTabs(activeTabs),
 	});
@@ -88,6 +72,8 @@ async function updateTab(
 
 		activeTabs[i] = fn(activeTabs[i]);
 		await state.set({ activeTabs });
+		void updateAction();
+		return;
 	}
 	await state.set({
 		activeTabs: [
@@ -111,7 +97,10 @@ async function updateMode(tabId: number | undefined, mode: ControllerModeStr) {
 	void updateAction();
 }
 
-async function updateState(tabId: number | undefined, song: Song | null) {
+async function updateState(
+	tabId: number | undefined,
+	song: CloneableSong | null
+) {
 	await updateTab(tabId, (oldTab) => ({
 		tabId: oldTab.tabId,
 		mode: oldTab.mode,
@@ -137,27 +126,6 @@ setupBackgroundListeners(
 	})
 );
 
-async function getCurrentTab(): Promise<ManagerTab> {
-	const { activeTabs } = (await state.get()) ?? { activeTabs: [] };
-	const filteredTabs = await filterInactiveTabs(activeTabs);
-	void state.set({
-		activeTabs: filteredTabs,
-	});
-
-	for (const priorityGroup of controllerModePriority) {
-		for (const tab of activeTabs) {
-			if (priorityGroup.includes(tab.mode)) {
-				return tab;
-			}
-		}
-	}
-	return {
-		tabId: -1,
-		mode: ControllerMode.Unsupported,
-		song: null,
-	};
-}
-
 async function setAction(mode: ControllerModeStr): Promise<void> {
 	await browser.action.setIcon({
 		path: {
@@ -175,7 +143,10 @@ async function setAction(mode: ControllerModeStr): Promise<void> {
 }
 
 async function updateAction() {
-	console.log('updating');
 	const tab = await getCurrentTab();
+	sendPopupMessage({
+		type: 'currentTab',
+		payload: tab,
+	});
 	await setAction(tab.mode);
 }

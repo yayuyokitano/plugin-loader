@@ -1,4 +1,5 @@
 import type { ConnectorMeta } from '@/core/connectors';
+import { State } from '@/core/types';
 
 export interface ProcessedSongData {
 	artist?: string | null;
@@ -8,7 +9,7 @@ export interface ProcessedSongData {
 	duration?: number | null;
 }
 
-interface ParsedSongData extends ProcessedSongData {
+export interface ParsedSongData extends ProcessedSongData {
 	trackArt?: string | null;
 	uniqueID?: string | null;
 	originUrl?: string | null;
@@ -17,7 +18,7 @@ interface ParsedSongData extends ProcessedSongData {
 	currentTime?: number | null;
 }
 
-type Flags =
+export type Flags =
 	| {
 			isScrobbled: boolean;
 			isCorrectedByUser: boolean;
@@ -28,7 +29,7 @@ type Flags =
 	  }
 	| Record<string, never>;
 
-type Metadata =
+export type Metadata =
 	| {
 			label: string;
 			startTimestamp: number;
@@ -44,7 +45,7 @@ type Metadata =
 	  }
 	| Record<string, never>;
 
-export interface ClonedSong {
+export interface CloneableSong {
 	parsed: ParsedSongData;
 	processed: ProcessedSongData;
 	flags: Flags;
@@ -52,66 +53,12 @@ export interface ClonedSong {
 	connectorLabel: string;
 }
 
-/**
- * Song object.
- */
-export default class Song {
-	public parsed: ParsedSongData;
-	public processed: ProcessedSongData;
-	public flags: Flags;
-	public metadata: Metadata;
-	public connectorLabel: string;
-	/**
-	 * @param parsedData - Current state received from connector
-	 * @param connector - Connector match object
-	 */
-	constructor(parsedData: Record<string, string>, connector: ConnectorMeta) {
-		/**
-		 * Safe copy of initial parsed data.
-		 * Must not be modified.
-		 */
-		this.parsed = Object.assign(
-			{
-				track: null,
-				artist: null,
-				albumArtist: null,
-				album: null,
-				duration: null,
-			},
-			parsedData
-		);
-
-		/**
-		 * Post-processed song data, for example auto-corrected.
-		 * Initially filled with parsed data and optionally changed
-		 * as the object is processed in pipeline. Can be modified.
-		 */
-		this.processed = {
-			track: null,
-			artist: null,
-			albumArtist: null,
-			album: null,
-			duration: null,
-		};
-
-		/**
-		 * Song flags. Can be modified.
-		 */
-		this.flags = {
-			/* Filled in `initFlags` method */
-		};
-
-		/**
-		 * Optional data. Can be modified.
-		 */
-		this.metadata = {
-			/* Filled in `initMetadata` method */
-		};
-
-		this.connectorLabel = connector.label;
-
-		this.initSongData();
-	}
+export abstract class BaseSong {
+	public abstract parsed: ParsedSongData;
+	public abstract processed: ProcessedSongData;
+	public abstract flags: Flags;
+	public abstract metadata: Metadata;
+	public abstract connectorLabel: string;
 
 	/**
 	 * Get song artist.
@@ -225,12 +172,12 @@ export default class Song {
 	 * @param song - Song instance to compare
 	 * @returns Check result
 	 */
-	equals(song: Song): boolean {
+	equals(song: BaseSong): boolean {
 		if (!song) {
 			return false;
 		}
 
-		if (!(song instanceof Song)) {
+		if (!(song instanceof BaseSong)) {
 			return false;
 		}
 
@@ -257,20 +204,7 @@ export default class Song {
 	 * @param isLoved - Flag means song is loved or not
 	 * @param force - Force status assignment
 	 */
-	setLoveStatus(isLoved: boolean, force = false): void {
-		if (force) {
-			this.metadata.userloved = isLoved;
-			return;
-		}
-
-		if (isLoved) {
-			if (this.metadata.userloved === undefined) {
-				this.metadata.userloved = true;
-			}
-		} else {
-			this.metadata.userloved = false;
-		}
-	}
+	abstract setLoveStatus(isLoved: boolean, force: boolean): void;
 
 	/**
 	 * Get a string representing the song.
@@ -286,7 +220,7 @@ export default class Song {
 	 *
 	 * @returns Object contain song data
 	 */
-	getCloneableData(): ClonedSong {
+	getCloneableData(): CloneableSong {
 		return {
 			parsed: this.parsed,
 			processed: this.processed,
@@ -299,17 +233,12 @@ export default class Song {
 	/**
 	 * Set default song info (artist, track, etc).
 	 */
-	resetInfo(): void {
-		this.initProcessedData();
-	}
+	abstract resetInfo(): void;
 
 	/**
 	 * Set default song data (flags and metadata only).
 	 */
-	resetData(): void {
-		this.initFlags();
-		this.initMetadata();
-	}
+	abstract resetData(): void;
 
 	/**
 	 * Custom fields can be defined by user.
@@ -324,16 +253,103 @@ export default class Song {
 	static get BASE_FIELDS(): ['artist', 'track', 'album', 'albumArtist'] {
 		return ['artist', 'track', 'album', 'albumArtist'];
 	}
+}
+
+/**
+ * Song object.
+ */
+export default class Song extends BaseSong {
+	public parsed: ParsedSongData;
+	public processed: ProcessedSongData;
+	public flags: Flags;
+	public metadata: Metadata;
+	public connectorLabel: string;
+	/**
+	 * @param parsedData - Current state received from connector
+	 * @param connector - Connector match object
+	 */
+	constructor(parsedData: State, connector: ConnectorMeta) {
+		super();
+		/**
+		 * Safe copy of initial parsed data.
+		 * Must not be modified.
+		 */
+		this.parsed = Object.assign(
+			{
+				track: null,
+				artist: null,
+				albumArtist: null,
+				album: null,
+				duration: null,
+			},
+			parsedData
+		);
+
+		/**
+		 * Post-processed song data, for example auto-corrected.
+		 * Initially filled with parsed data and optionally changed
+		 * as the object is processed in pipeline. Can be modified.
+		 */
+		this.processed = {
+			track: null,
+			artist: null,
+			albumArtist: null,
+			album: null,
+			duration: null,
+		};
+
+		/**
+		 * Song flags. Can be modified.
+		 */
+		this.flags = {
+			/* Filled in `initFlags` method */
+		};
+
+		/**
+		 * Optional data. Can be modified.
+		 */
+		this.metadata = {
+			/* Filled in `initMetadata` method */
+		};
+
+		this.connectorLabel = connector.label;
+
+		this.initSongData();
+	}
+
+	public setLoveStatus(isLoved: boolean, force = false): void {
+		if (force) {
+			this.metadata.userloved = isLoved;
+			return;
+		}
+
+		if (isLoved) {
+			if (this.metadata.userloved === undefined) {
+				this.metadata.userloved = true;
+			}
+		} else {
+			this.metadata.userloved = false;
+		}
+	}
+
+	public resetInfo(): void {
+		this.initProcessedData();
+	}
+
+	public resetData(): void {
+		this.initFlags();
+		this.initMetadata();
+	}
 
 	/** Private methods. */
 
-	initSongData(): void {
+	private initSongData(): void {
 		this.initFlags();
 		this.initMetadata();
 		this.initProcessedData();
 	}
 
-	initFlags(): void {
+	private initFlags(): void {
 		this.flags = {
 			/**
 			 * Flag means song is scrobbled successfully.
@@ -367,7 +383,7 @@ export default class Song {
 		};
 	}
 
-	initMetadata(): void {
+	private initMetadata(): void {
 		this.metadata = {
 			/**
 			 * Flag indicates song is loved by used on service.
@@ -383,7 +399,7 @@ export default class Song {
 		};
 	}
 
-	initProcessedData(): void {
+	private initProcessedData(): void {
 		const fields: ['track', 'album', 'artist', 'albumArtist', 'duration'] =
 			['track', 'album', 'artist', 'albumArtist', 'duration'];
 		for (const field of fields) {

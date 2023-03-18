@@ -1,6 +1,11 @@
 import { getConnectorByUrl } from '@/core/content/util-connector';
 import { ManagerTab, StateManagement } from '@/storage/wrapper';
 import browser from 'webextension-polyfill';
+import * as ControllerMode from '@/object/controller/controller-mode';
+import * as BrowserStorage from '@/storage/browser-storage';
+import { controllerModePriority } from '@/object/controller/controller';
+
+const state = BrowserStorage.getStorage(BrowserStorage.STATE_MANAGEMENT);
 
 /**
  * Filters asynchronously. Parallelized.
@@ -74,3 +79,44 @@ async function updateTabState(
 	const newActiveTabs = state.activeTabs.map()
 }
 */
+
+export async function filterInactiveTabs(activeTabs: ManagerTab[]) {
+	return filterAsync(activeTabs, async (entry) => {
+		try {
+			if (entry.mode === ControllerMode.Unsupported) {
+				return false;
+			}
+			const tab = await browser.tabs.get(entry.tabId);
+			const connector = await getConnectorByUrl(tab.url ?? '');
+			return connector !== null;
+		} catch (err) {
+			return false;
+		}
+	});
+}
+
+export async function getCurrentTab(): Promise<ManagerTab> {
+	const { activeTabs } = (await state.get()) ?? { activeTabs: [] };
+	const filteredTabs = await filterInactiveTabs(activeTabs);
+	void state.set({
+		activeTabs: filteredTabs,
+	});
+
+	for (const priorityGroup of controllerModePriority) {
+		for (const tab of activeTabs) {
+			if (priorityGroup.includes(tab.mode)) {
+				return tab;
+			}
+		}
+	}
+	return {
+		tabId: -1,
+		mode: ControllerMode.Unsupported,
+		song: null,
+	};
+}
+
+export async function fetchTab() {
+	const { activeTabs } = (await state.get()) ?? { activeTabs: [] };
+	return activeTabs;
+}

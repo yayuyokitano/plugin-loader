@@ -18,7 +18,7 @@ import {
 	SavedEdit,
 } from '@/storage/options';
 import { ControllerModeStr } from '@/object/controller/controller';
-import Song from '@/object/song';
+import { CloneableSong } from '@/object/song';
 
 export interface CustomPatterns {
 	[connectorId: string]: string[];
@@ -54,7 +54,7 @@ export interface ScrobblerModels {
 export interface ManagerTab {
 	tabId: number;
 	mode: ControllerModeStr;
-	song: Song | null;
+	song: CloneableSong | null;
 }
 
 export interface StateManagement {
