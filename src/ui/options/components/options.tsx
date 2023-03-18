@@ -676,18 +676,18 @@ function EditCustomPatterns(props: {
 							class={styles.patternInput}
 							type="text"
 							value={pattern}
-							onChange={(e) => {
+							onInput={(e) => {
 								setCustomPatternOptions.mutate((o) => {
-									const newPatterns = {
-										...(o ?? {}),
-									};
-									newPatterns[connector.id] = [
-										...(newPatterns[connector.id] ?? []),
+									if (!o) {
+										o = {};
+									}
+									o[connector.id] = [
+										...(o[connector.id] ?? []),
 									];
-									newPatterns[connector.id][i()] =
+									o[connector.id][i()] =
 										e.currentTarget.value;
-									customPatterns.set(newPatterns);
-									return newPatterns;
+									customPatterns.set(o);
+									return o;
 								});
 							}}
 						/>
