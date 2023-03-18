@@ -3,8 +3,10 @@
  * on pageload, this starter is needed for connectors to start running
  */
 
-import Controller from '@/core/content/reactor';
+import Reactor from '@/core/content/reactor';
 import BaseConnector from './connector';
+import * as BrowserStorage from '@/storage/browser-storage';
+import { DISABLED_CONNECTORS } from '@/storage/options';
 
 export default function start() {
 	if (window.STARTER_LOADED) {
@@ -20,7 +22,7 @@ export default function start() {
 		return;
 	}
 
-	setupStateListening();
+	void setupStateListening();
 }
 
 function isConnectorInvalid() {
@@ -30,8 +32,13 @@ function isConnectorInvalid() {
 	);
 }
 
-function setupStateListening() {
-	new Controller(Connector);
+async function setupStateListening() {
+	const globalOptions = BrowserStorage.getStorage(BrowserStorage.OPTIONS);
+	const options = await globalOptions.get();
+	new Reactor(
+		Connector,
+		options === null || !options[DISABLED_CONNECTORS][Connector.meta.id]
+	);
 
 	if (Connector.playerSelector === null) {
 		Util.debugLog(

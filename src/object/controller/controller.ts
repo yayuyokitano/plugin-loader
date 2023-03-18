@@ -31,6 +31,18 @@ export type ControllerModeStr =
 	(typeof ControllerMode)[keyof typeof ControllerMode];
 
 /**
+ * States and their priority. earlier indices will be displayed first.
+ */
+export const controllerModePriority: ControllerModeStr[][] = [
+	[ControllerMode.Err, ControllerMode.Ignored],
+	[ControllerMode.Unknown],
+	[ControllerMode.Loading],
+	[ControllerMode.Playing, ControllerMode.Scrobbled],
+	[ControllerMode.Base],
+	[ControllerMode.Skipped, ControllerMode.Disabled],
+];
+
+/**
  * Object that handles song playback and scrobbling actions.
  */
 export default class Controller {
@@ -55,6 +67,7 @@ export default class Controller {
 		this.connector = connector;
 		this.isEnabled = isEnabled;
 		this.mode = isEnabled ? ControllerMode.Base : ControllerMode.Disabled;
+		this.setMode(this.mode);
 		Options.getOption(Options.SCROBBLE_PODCASTS, connector.id)
 			.then((shouldScrobblePodcasts) => {
 				if (typeof shouldScrobblePodcasts !== 'boolean') {

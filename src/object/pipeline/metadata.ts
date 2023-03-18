@@ -72,8 +72,8 @@ export async function process(
 	);
 
 	song.flags.isValid =
-		(isSongValid || (forceRecognize ?? false)) &&
-		(song.flags.isCorrectedByUser || !scrobbleEditedTracksOnly);
+		(isSongValid || Boolean(forceRecognize)) &&
+		(song.flags.isCorrectedByUser || !Boolean(scrobbleEditedTracksOnly));
 }
 
 /**

@@ -1,9 +1,6 @@
 import BaseConnector from '@/core/content/connector';
-import browser from 'webextension-polyfill';
 import { State } from '@/core/types';
-import * as Util from '@/core/content/util';
 import Controller from '@/object/controller/controller';
-import { ConnectorMeta } from '../connectors';
 
 /**
  * Reactor object reacts to changes in supplied connector
@@ -15,8 +12,8 @@ export default class Reactor {
 	/**
 	 * @param connector - Connector object
 	 */
-	constructor(connector: BaseConnector) {
-		this.controller = new Controller(connector.meta, true);
+	constructor(connector: BaseConnector, isEnabled: boolean) {
+		this.controller = new Controller(connector.meta, isEnabled);
 
 		console.log('binding');
 		// Setup listening for state changes on connector.

@@ -30,9 +30,11 @@ async function main() {
 
 	if (process.env.BROWSER === 'safari') {
 		colorLog('Compiling safari extension', 'info');
-		exec('bash safari.sh', (err) => {
+		exec('bash safari.sh', (err, stdout, stderr) => {
 			if (err) {
 				colorLog(err, 'error');
+				colorLog(stdout, 'info');
+				colorLog(stderr, 'error');
 				return;
 			}
 			colorLog('Successfully compiled safari extension', 'success');

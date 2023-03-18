@@ -17,7 +17,8 @@ import {
 	GlobalOptions,
 	SavedEdit,
 } from '@/storage/options';
-import { State } from '@/core/types';
+import { ControllerModeStr } from '@/object/controller/controller';
+import Song from '@/object/song';
 
 export interface CustomPatterns {
 	[connectorId: string]: string[];
@@ -52,7 +53,8 @@ export interface ScrobblerModels {
 
 export interface ManagerTab {
 	tabId: number;
-	state: State | null;
+	mode: ControllerModeStr;
+	song: Song | null;
 }
 
 export interface StateManagement {

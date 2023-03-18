@@ -8,6 +8,7 @@ function Popup() {
 	return (
 		<div class={styles.popup}>
 			<Unsupported />
+			<p>mode()</p>
 		</div>
 	);
 }

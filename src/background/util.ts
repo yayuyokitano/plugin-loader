@@ -9,7 +9,7 @@ import browser from 'webextension-polyfill';
  * @param filter - The filtering function
  * @returns A promise that will resolve to the array without the entries where filter returned false.
  */
-async function filterAsync<T>(
+export async function filterAsync<T>(
 	arr: T[],
 	filter: (entry: T) => Promise<boolean>
 ): Promise<T[]> {

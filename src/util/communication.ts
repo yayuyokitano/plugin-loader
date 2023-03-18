@@ -1,11 +1,12 @@
 import { ControllerModeStr } from '@/object/controller/controller';
 import Song from '@/object/song';
+import { ManagerTab } from '@/storage/wrapper';
 import browser from 'webextension-polyfill';
 
 interface BackgroundCommunications {
-	nowPlaying: {
+	currentTab: {
 		payload: undefined;
-		response: Song | null;
+		response: ManagerTab;
 	};
 }
 

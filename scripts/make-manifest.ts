@@ -8,31 +8,35 @@ export default function makeManifest(): PluginOption {
 	return {
 		name: 'make-manifest',
 		generateBundle() {
-			switch (process.env.BROWSER) {
-				case 'chrome':
-				case 'safari':
-					fs.writeJSON(
-						`build/${getBrowser(
-							process.env.BROWSER
-						)}/manifest.json`,
-						chromeManifest,
-						{ spaces: 2 }
-					).then(() => {
-						colorLog('Successfully wrote manifest', 'success');
-					});
-					break;
-				case 'firefox':
-					fs.writeJSON(
-						`build/${getBrowser(
-							process.env.BROWSER
-						)}/manifest.json`,
-						firefoxManifest,
-						{ spaces: 2 }
-					).then(() => {
-						colorLog('Successfully wrote manifest', 'success');
-					});
-					break;
-			}
+			return new Promise((resolve, reject) => {
+				switch (process.env.BROWSER) {
+					case 'chrome':
+					case 'safari':
+						fs.writeJSON(
+							`build/${getBrowser(
+								process.env.BROWSER
+							)}/manifest.json`,
+							chromeManifest,
+							{ spaces: 2 }
+						).then(() => {
+							colorLog('Successfully wrote manifest', 'success');
+							resolve();
+						});
+						break;
+					case 'firefox':
+						fs.writeJSON(
+							`build/${getBrowser(
+								process.env.BROWSER
+							)}/manifest.json`,
+							firefoxManifest,
+							{ spaces: 2 }
+						).then(() => {
+							colorLog('Successfully wrote manifest', 'success');
+							resolve();
+						});
+						break;
+				}
+			});
 		},
 	};
 }

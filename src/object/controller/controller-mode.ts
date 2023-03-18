@@ -42,3 +42,8 @@ export const Skipped = 'Skipped';
  * An unknown song is playing.
  */
 export const Unknown = 'Unknown';
+
+/**
+ * Site is unsupported.
+ */
+export const Unsupported = 'Unsupported';

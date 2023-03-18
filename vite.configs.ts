@@ -88,7 +88,6 @@ export const buildStart: UserConfig = {
 	},
 	plugins: [
 		solid(),
-		compileConnectors(),
 		makeManifest(),
 		viteStaticCopy({
 			targets: [
@@ -106,5 +105,6 @@ export const buildStart: UserConfig = {
 				},
 			],
 		}),
+		compileConnectors(),
 	],
 };

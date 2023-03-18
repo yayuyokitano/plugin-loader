@@ -3,12 +3,11 @@
 import { DebugLogType, debugLog } from '@/util/util';
 import Song from '@/object/song';
 import { ServiceCallResult } from '@/object/service-call-result';
-import StorageWrapper, { DataModels, ScrobblerModels } from '@/storage/wrapper';
+import StorageWrapper, { ScrobblerModels } from '@/storage/wrapper';
 import {
 	StorageNamespace,
 	getScrobblerStorage,
 } from '../storage/browser-storage';
-import { ScrobblerLabel } from '@/object/scrobble-service';
 
 export interface SessionData {
 	/** ID of a current session */
@@ -77,6 +76,7 @@ export default abstract class BaseScrobbler<K extends keyof ScrobblerModels> {
 		  }
 	> {
 		const storage = await this.storage.get();
+		// @ts-ignore typescript is being weird and inconsistent about this line.
 		if (!storage || !('properties' in storage) || !storage.properties) {
 			return {} as Record<string, never>;
 		}
@@ -107,12 +107,14 @@ export default abstract class BaseScrobbler<K extends keyof ScrobblerModels> {
 			return;
 		}
 
+		// @ts-ignore typescript is being weird and inconsistent about this line.
 		if (!('properties' in data) || data.properties === undefined) {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access -- Need to set properties even if undefined here
 			(data as any).properties = {};
 		}
 
 		// this is weird we're just helping typescript out
+		// @ts-ignore typescript is being weird and inconsistent about this line.
 		if (!('properties' in data) || data.properties === undefined) {
 			debugLog('No properties in storage', 'error');
 			return;
@@ -166,9 +168,11 @@ export default abstract class BaseScrobbler<K extends keyof ScrobblerModels> {
 			debugLog('No data in storage', 'error');
 			return;
 		}
+		// @ts-ignore typescript is being weird and inconsistent about this line.
 		if ('sessionID' in data) {
 			delete data.sessionID;
 		}
+		// @ts-ignore typescript is being weird and inconsistent about this line.
 		if ('sessionName' in data) {
 			delete data.sessionName;
 		}
@@ -326,6 +330,7 @@ export default abstract class BaseScrobbler<K extends keyof ScrobblerModels> {
 
 	private async initUserProps() {
 		const storageContent = await this.storage.get();
+		// @ts-ignore typescript is being weird and inconsistent about this line.
 		if (storageContent && 'properties' in storageContent) {
 			for (const prop in storageContent.properties) {
 				// this is a little cursed, but lets the TS compiler know what's going on
