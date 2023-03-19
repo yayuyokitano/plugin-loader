@@ -19,6 +19,7 @@ import {
 } from '@/storage/options';
 import { ControllerModeStr } from '@/object/controller/controller';
 import { CloneableSong } from '@/object/song';
+import EventEmitter from '@/util/emitter';
 
 export interface CustomPatterns {
 	[connectorId: string]: string[];
@@ -77,6 +78,12 @@ export interface DataModels extends ScrobblerModels {
 	[STATE_MANAGEMENT]: StateManagement;
 }
 
+type StorageEvents = {
+	updateLock: (toRun: number) => void;
+};
+
+const LOCKING_TIMEOUT = 3000;
+
 /**
  * StorageArea wrapper that supports for namespaces.
  *
@@ -88,6 +95,16 @@ export default class StorageWrapper<K extends keyof DataModels> {
 		| browser.Storage.SyncStorageAreaSync
 		| browser.Storage.LocalStorageArea;
 	private namespace: StorageNamespace;
+	private requests: number[] = [];
+	private autoIncrement = 0;
+	private emitter = new EventEmitter<StorageEvents>();
+
+	/**
+	 * interval to ensure the locking doesnt get stuck permanently
+	 */
+	private interval = setInterval(() => {
+		this.unlock();
+	}, LOCKING_TIMEOUT);
 
 	/**
 	 * @param storage - StorageArea object
@@ -103,12 +120,47 @@ export default class StorageWrapper<K extends keyof DataModels> {
 		this.namespace = namespace;
 	}
 
+	unlock(): void {
+		this.emitter.emit('updateLock', [this.requests[0]]);
+		this.requests = this.requests.slice(1);
+
+		clearInterval(this.interval);
+		this.interval = setInterval(() => {
+			this.unlock();
+		}, LOCKING_TIMEOUT);
+	}
+
 	/**
 	 * Read data from storage.
 	 * @typeParam T - Data type
+	 * @param locking - Whether to use locking. Prevents race conditions. Non-locking gets will not respect locking either.
 	 * @returns Storage data
 	 */
-	async get(): Promise<DataModels[K] | null> {
+	async get(locking = false): Promise<DataModels[K] | null> {
+		const ready = new Promise((resolve) => {
+			if (!locking) {
+				resolve(true);
+				return;
+			}
+
+			const id = this.autoIncrement++;
+			this.requests.push(id);
+			if (this.requests[0] === id) {
+				resolve(true);
+				return;
+			}
+
+			const unlock = (toRun: number) => {
+				if (toRun === id) {
+					resolve(true);
+					this.emitter.off('updateLock', unlock);
+					return;
+				}
+			};
+			this.emitter.on('updateLock', unlock);
+		});
+		await ready;
+
 		const data = await this.storage.get();
 		if (data && this.namespace in data) {
 			return data[this.namespace] as DataModels[K];
@@ -121,7 +173,10 @@ export default class StorageWrapper<K extends keyof DataModels> {
 	 * Save data to storage.
 	 * @param data - Data to save
 	 */
-	async set(data: DataModels[K]): Promise<void> {
+	async set(data: DataModels[K], locking = false): Promise<void> {
+		if (locking) {
+			this.unlock();
+		}
 		const dataToSave = {
 			[this.namespace]: data,
 		};
@@ -134,11 +189,11 @@ export default class StorageWrapper<K extends keyof DataModels> {
 	 * @param data - Data to add
 	 */
 	async update(data: Partial<DataModels[K]>): Promise<void> {
-		const storageData = await this.get();
+		const storageData = await this.get(true);
 		const dataToSave = Object.assign(storageData ?? {}, data);
 
 		// TODO: use default here instead of empty object to avoid this workaround
-		await this.set(dataToSave as DataModels[K]);
+		await this.set(dataToSave as DataModels[K], true);
 	}
 
 	/**

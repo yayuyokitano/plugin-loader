@@ -63,29 +63,43 @@ async function updateTab(
 	if (!tabId) {
 		throw new Error('No tabid given');
 	}
-	let { activeTabs } = (await state.get()) ?? { activeTabs: [] };
-	activeTabs = await filterInactiveTabs(activeTabs);
-	for (let i = 0; i < activeTabs.length; i++) {
-		if (activeTabs[i].tabId !== tabId) {
-			continue;
-		}
 
-		activeTabs[i] = fn(activeTabs[i]);
-		await state.set({ activeTabs });
+	// perform the update, making sure there is no race condition, and making sure locking isnt permanently locked by an error
+	let performedSet = false;
+	try {
+		let { activeTabs } = (await state.get(true)) ?? { activeTabs: [] };
+		activeTabs = await filterInactiveTabs(activeTabs);
+		for (let i = 0; i < activeTabs.length; i++) {
+			if (activeTabs[i].tabId !== tabId) {
+				continue;
+			}
+
+			activeTabs[i] = fn(activeTabs[i]);
+			performedSet = true;
+			await state.set({ activeTabs }, true);
+			void updateAction();
+			return;
+		}
+		performedSet = true;
+		await state.set(
+			{
+				activeTabs: [
+					fn({
+						tabId,
+						mode: ControllerMode.Unsupported,
+						song: null,
+					}),
+					...activeTabs,
+				],
+			},
+			true
+		);
 		void updateAction();
-		return;
+	} catch (err) {
+		if (!performedSet) {
+			state.unlock();
+		}
 	}
-	await state.set({
-		activeTabs: [
-			fn({
-				tabId,
-				mode: ControllerMode.Unsupported,
-				song: null,
-			}),
-			...activeTabs,
-		],
-	});
-	void updateAction();
 }
 
 async function updateMode(tabId: number | undefined, mode: ControllerModeStr) {

@@ -49,3 +49,88 @@ a {
 		}
 	}
 }
+
+.nowPlayingPopup {
+	background-color: transparent;
+	display: flex;
+	overflow: hidden;
+
+	.coverArtWrapper {
+		height: 100vh;
+
+		.coverArt {
+			width: 100vh;
+		}
+	}
+
+	.songDetails {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25em;
+		max-width: 50ch;
+		min-width: 30ch;
+		padding: 0.5em 1em;
+		white-space: nowrap;
+	}
+
+	.playDetails {
+		display: flex;
+		gap: 0.5em;
+	}
+
+	.playCount {
+		align-items: center;
+		display: flex;
+		gap: 0.25em;
+
+		svg {
+			fill: var(--always-light);
+			height: 1.2em;
+			width: 1.2em;
+		}
+	}
+
+	.label {
+		background-color: var(--last-fm);
+		border-radius: 0.25em;
+		color: var(--always-light);
+		padding: 0.25em 0.5em;
+	}
+
+	.controlButtons {
+		display: flex;
+		margin-top: 0.5em;
+
+		.controlButton {
+			background-color: transparent;
+			border: none;
+			color: var(--text);
+			cursor: pointer;
+			padding: 0.25em 0.5em;
+
+			&:hover,
+			&.active {
+				color: var(--last-fm);
+			}
+
+			&:not(:hover) .hover {
+				display: none;
+			}
+
+			&:hover .nonHover {
+				display: none;
+			}
+
+			&[disabled] {
+				cursor: not-allowed;
+				&:not(.hiddenDisabled) {
+					color: var(--checkbox-inactive);
+				}
+			}
+		}
+	}
+}
+
+.bold {
+	font-weight: bold;
+}

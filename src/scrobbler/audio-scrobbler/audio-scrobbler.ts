@@ -4,7 +4,7 @@ import { hideStringInText, timeoutPromise } from '@/util/util';
 import { createQueryString } from '@/util/util-browser';
 import BaseScrobbler, { SessionData } from '@/scrobbler/base-scrobbler';
 import { ServiceCallResult } from '@/object/service-call-result';
-import Song from '@/object/song';
+import Song, { BaseSong } from '@/object/song';
 import {
 	AudioScrobblerSessionResponse,
 	AudioScrobblerTrackScrobbleResponse,
@@ -226,7 +226,10 @@ export default abstract class AudioScrobbler extends BaseScrobbler<'LastFM'> {
 	}
 
 	/** @override */
-	async toggleLove(song: Song, isLoved: boolean): Promise<ServiceCallResult> {
+	async toggleLove(
+		song: BaseSong,
+		isLoved: boolean
+	): Promise<ServiceCallResult> {
 		const { sessionID } = await this.getSession();
 		const params = {
 			method: isLoved ? 'track.love' : 'track.unlove',

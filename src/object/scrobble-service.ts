@@ -4,7 +4,7 @@ import LibreFmScrobbler from '@/scrobbler/librefm-scrobbler';
 import ListenBrainzScrobbler from '@/scrobbler/listenbrainz/listenbrainz-scrobbler';
 import MalojaScrobbler from '@/scrobbler/maloja/maloja-scrobbler';
 import { ServiceCallResult } from '@/object/service-call-result';
-import Song from '@/object/song';
+import Song, { BaseSong } from '@/object/song';
 import { ScrobblerSongInfo } from '@/scrobbler/base-scrobbler';
 
 /**
@@ -176,7 +176,7 @@ class ScrobbleService {
 	 * @returns Promise that will be resolved then the task will complete
 	 */
 	async toggleLove(
-		song: Song,
+		song: BaseSong,
 		flag: boolean
 	): Promise<(ServiceCallResult | Record<string, never>)[]> {
 		const scrobblers = registeredScrobblers.filter((scrobbler) => {

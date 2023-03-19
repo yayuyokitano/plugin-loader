@@ -30,11 +30,14 @@ interface BackgroundCommunications {
 		payload: undefined;
 		response: void;
 	};
-	setLoveStatus: {
+	toggleLove: {
 		payload: {
 			isLoved: boolean;
-			force: boolean;
 		};
+		response: void;
+	};
+	skipCurrentSong: {
+		payload: undefined;
 		response: void;
 	};
 }

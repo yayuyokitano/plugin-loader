@@ -16,7 +16,11 @@ import ScrobbleService from '@/object/scrobble-service';
 import { ServiceCallResult } from '@/object/service-call-result';
 import SavedEdits from '@/storage/saved-edits';
 import { State } from '@/core/types';
-import { sendContentMessage } from '@/util/communication';
+import {
+	contentListener,
+	sendContentMessage,
+	setupContentListeners,
+} from '@/util/communication';
 
 /**
  * List of song fields used to check if song is changed. If any of
@@ -80,6 +84,21 @@ export default class Controller {
 			});
 
 		this.debugLog(`Created controller for ${connector.label} connector`);
+
+		setupContentListeners(
+			contentListener({
+				type: 'skipCurrentSong',
+				fn: () => {
+					this.skipCurrentSong();
+				},
+			}),
+			contentListener({
+				type: 'toggleLove',
+				fn: ({ isLoved }) => {
+					this.toggleLove(isLoved);
+				},
+			})
+		);
 	}
 
 	/** Listeners. */
@@ -232,9 +251,15 @@ export default class Controller {
 			throw new Error('No valid song is now playing');
 		}
 
-		await ScrobbleService.toggleLove(this.currentSong, isLoved);
-
+		// set love status optimistically, amend to revert if it were to fail.
 		this.currentSong.setLoveStatus(isLoved, true);
+		this.onSongUpdated();
+		try {
+			await ScrobbleService.toggleLove(this.currentSong, isLoved);
+		} catch (err) {
+			this.currentSong.setLoveStatus(!isLoved, true);
+		}
+
 		this.onSongUpdated();
 	}
 

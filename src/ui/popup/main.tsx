@@ -35,7 +35,13 @@ function Popup() {
 			<Match when={tab()?.mode === ControllerMode.Err}>
 				<Err />
 			</Match>
-			<Match when={tab()?.mode === ControllerMode.Playing}>
+			<Match
+				when={
+					tab()?.mode === ControllerMode.Playing ||
+					tab()?.mode === ControllerMode.Skipped ||
+					tab()?.mode === ControllerMode.Scrobbled
+				}
+			>
 				<NowPlaying tab={tab} />
 			</Match>
 			<Match when={tab()?.mode === ControllerMode.Unsupported}>

@@ -39,14 +39,4 @@ export default class ClonedSong extends BaseSong {
 			payload: undefined,
 		});
 	}
-
-	public setLoveStatus(isLoved: boolean, force = false): void {
-		sendBackgroundMessage(this.controllerTabId, {
-			type: 'setLoveStatus',
-			payload: {
-				isLoved,
-				force,
-			},
-		});
-	}
 }

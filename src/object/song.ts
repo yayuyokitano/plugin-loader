@@ -1,5 +1,7 @@
 import type { ConnectorMeta } from '@/core/connectors';
 import { State } from '@/core/types';
+import { contentListener, setupContentListeners } from '@/util/communication';
+import scrobbleService from './scrobble-service';
 
 export interface ProcessedSongData {
 	artist?: string | null;
@@ -195,18 +197,6 @@ export abstract class BaseSong {
 	}
 
 	/**
-	 * Set `Love` status of song.
-	 *
-	 * This function is supposed to be used by multiple scrobblers
-	 * (services). Each service can have different value of `Love` flag;
-	 * the behavior of the function is to set `Love` to true, if all
-	 * services have the song with `Love` set to true.
-	 * @param isLoved - Flag means song is loved or not
-	 * @param force - Force status assignment
-	 */
-	abstract setLoveStatus(isLoved: boolean, force: boolean): void;
-
-	/**
 	 * Get a string representing the song.
 	 *
 	 * @returns String representing the object.
@@ -228,6 +218,31 @@ export abstract class BaseSong {
 			flags: this.flags,
 			connectorLabel: this.connectorLabel,
 		};
+	}
+
+	/**
+	 * Set `Love` status of song.
+	 *
+	 * This function is supposed to be used by multiple scrobblers
+	 * (services). Each service can have different value of `Love` flag;
+	 * the behavior of the function is to set `Love` to true, if all
+	 * services have the song with `Love` set to true.
+	 * @param isLoved - Flag means song is loved or not
+	 * @param force - Force status assignment
+	 */
+	setLoveStatus(isLoved: boolean, force = false): void {
+		if (force) {
+			this.metadata.userloved = isLoved;
+			return;
+		}
+
+		if (isLoved) {
+			if (this.metadata.userloved === undefined) {
+				this.metadata.userloved = true;
+			}
+		} else {
+			this.metadata.userloved = false;
+		}
 	}
 
 	/**
@@ -315,21 +330,8 @@ export default class Song extends BaseSong {
 		this.connectorLabel = connector.label;
 
 		this.initSongData();
-	}
 
-	public setLoveStatus(isLoved: boolean, force = false): void {
-		if (force) {
-			this.metadata.userloved = isLoved;
-			return;
-		}
-
-		if (isLoved) {
-			if (this.metadata.userloved === undefined) {
-				this.metadata.userloved = true;
-			}
-		} else {
-			this.metadata.userloved = false;
-		}
+		console.log('creating song');
 	}
 
 	public resetInfo(): void {

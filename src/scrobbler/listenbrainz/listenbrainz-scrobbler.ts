@@ -1,7 +1,7 @@
 'use strict';
 
 import { ServiceCallResult } from '@/object/service-call-result';
-import Song from '@/object/song';
+import Song, { BaseSong } from '@/object/song';
 import * as Util from '@/util/util';
 import { getExtensionVersion } from '@/util/util-browser';
 import BaseScrobbler, { SessionData } from '@/scrobbler/base-scrobbler';
@@ -187,7 +187,7 @@ export default class ListenBrainzScrobbler extends BaseScrobbler<'ListenBrainz'>
 	}
 
 	/** @override */
-	async toggleLove(song: Song, isLoved: boolean) {
+	async toggleLove(song: BaseSong, isLoved: boolean) {
 		// https://listenbrainz.readthedocs.io/en/latest/users/api-usage.html#lookup-mbids
 		const track = song.getTrack();
 		const artist = song.getArtist();

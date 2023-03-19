@@ -1,7 +1,7 @@
 'use strict';
 
 import { DebugLogType, debugLog } from '@/util/util';
-import Song from '@/object/song';
+import Song, { BaseSong } from '@/object/song';
 import { ServiceCallResult } from '@/object/service-call-result';
 import StorageWrapper, { ScrobblerModels } from '@/storage/wrapper';
 import {
@@ -216,7 +216,7 @@ export default abstract class BaseScrobbler<K extends keyof ScrobblerModels> {
 	 */
 	// eslint-disable-next-line no-unused-vars
 	public abstract toggleLove(
-		song: Song,
+		song: BaseSong,
 		isLoved: boolean
 	): Promise<ServiceCallResult | Record<string, never>>;
 
