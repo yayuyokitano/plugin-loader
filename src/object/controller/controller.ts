@@ -124,6 +124,12 @@ export default class Controller {
 				fn: () => {
 					this.resetSongData();
 				},
+			}),
+			contentListener({
+				type: 'setConnectorState',
+				fn: (isEnabled) => {
+					this.setConnectorState(isEnabled);
+				},
 			})
 		);
 	}
@@ -669,6 +675,16 @@ export default class Controller {
 	setSongNotRecognized(): void {
 		this.setMode(ControllerMode.Unknown);
 		this.dispatchEvent(ControllerEvents.SongUnrecognized);
+	}
+
+	/**
+	 * Enable or disable a connector
+	 *
+	 * @param isEnabled - Whether to enable or disable connector.
+	 */
+	setConnectorState(isEnabled: boolean) {
+		this.setEnabled(isEnabled);
+		Options.setConnectorEnabled(this.getConnector(), isEnabled);
 	}
 
 	/**

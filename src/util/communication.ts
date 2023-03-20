@@ -48,6 +48,10 @@ interface BackgroundCommunications {
 		payload: boolean;
 		response: void;
 	};
+	setConnectorState: {
+		payload: boolean;
+		response: void;
+	};
 }
 
 /**

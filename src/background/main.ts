@@ -4,6 +4,7 @@ import * as BrowserStorage from '@/storage/browser-storage';
 import { ManagerTab } from '@/storage/wrapper';
 import {
 	backgroundListener,
+	sendBackgroundMessage,
 	sendPopupMessage,
 	setupBackgroundListeners,
 } from '@/util/communication';
@@ -13,12 +14,15 @@ import { ControllerModeStr } from '@/object/controller/controller';
 import Song, { CloneableSong } from '@/object/song';
 import { t } from '@/util/i18n';
 
+const contextMenus = {
+	ENABLE_CONNECTOR: 'enableConnector',
+	DISABLE_CONNECTOR: 'disableConnector',
+};
+
 const state = BrowserStorage.getStorage(BrowserStorage.STATE_MANAGEMENT);
-browser.runtime.onStartup.addListener(() => {
-	state.set({
-		activeTabs: [],
-	});
-});
+
+browser.runtime.onStartup.addListener(startupFunc);
+browser.runtime.onInstalled.addListener(startupFunc);
 
 browser.tabs.onRemoved.addListener(async () => {
 	const activeTabs = await fetchTab();
@@ -162,5 +166,79 @@ async function updateAction() {
 		type: 'currentTab',
 		payload: tab,
 	});
+	await updateMenus(tab);
 	await setAction(tab.mode);
+}
+
+async function updateMenus(tab: ManagerTab) {
+	if (tab.mode === ControllerMode.Unsupported) {
+		void browser.contextMenus.update(contextMenus.ENABLE_CONNECTOR, {
+			visible: false,
+		});
+		void browser.contextMenus.update(contextMenus.DISABLE_CONNECTOR, {
+			visible: false,
+		});
+		return;
+	}
+
+	const tabData = await browser.tabs.get(tab.tabId);
+	const connector = await getConnectorByUrl(tabData.url ?? '');
+	if (tab.mode === ControllerMode.Disabled) {
+		void browser.contextMenus.update(contextMenus.ENABLE_CONNECTOR, {
+			visible: true,
+			title: t('menuEnableConnector', connector?.label),
+		});
+		void browser.contextMenus.update(contextMenus.DISABLE_CONNECTOR, {
+			visible: false,
+		});
+		return;
+	}
+
+	void browser.contextMenus.update(contextMenus.ENABLE_CONNECTOR, {
+		visible: false,
+	});
+	void browser.contextMenus.update(contextMenus.DISABLE_CONNECTOR, {
+		visible: true,
+		title: t('menuDisableConnector', connector?.label),
+	});
+}
+
+function startupFunc() {
+	state.set({
+		activeTabs: [],
+	});
+
+	browser.contextMenus.create({
+		id: contextMenus.ENABLE_CONNECTOR,
+		visible: false,
+		contexts: ['action'],
+		title: 'Error: You should not be seeing this',
+	});
+
+	browser.contextMenus.create({
+		id: contextMenus.DISABLE_CONNECTOR,
+		visible: false,
+		contexts: ['action'],
+		title: 'Error: You should not be seeing this',
+	});
+
+	browser.contextMenus.onClicked.addListener(async (info) => {
+		const tab = await getCurrentTab();
+
+		switch (info.menuItemId) {
+			case contextMenus.ENABLE_CONNECTOR: {
+				sendBackgroundMessage(tab.tabId ?? -1, {
+					type: 'setConnectorState',
+					payload: true,
+				});
+				break;
+			}
+			case contextMenus.DISABLE_CONNECTOR: {
+				sendBackgroundMessage(tab.tabId ?? -1, {
+					type: 'setConnectorState',
+					payload: false,
+				});
+			}
+		}
+	});
 }

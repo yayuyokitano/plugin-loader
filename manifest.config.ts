@@ -7,7 +7,7 @@ export const common: Manifest.WebExtensionManifest = {
 	default_locale: 'en',
 	description: '__MSG_extDescription__',
 	version: pkg.version,
-	permissions: ['scripting', 'storage'],
+	permissions: ['scripting', 'storage', 'contextMenus'],
 	host_permissions: ['http://*/', 'https://*/'],
 
 	content_scripts: [
