@@ -1,3 +1,4 @@
+import { ConnectorMeta } from '@/core/connectors';
 import { ControllerModeStr } from '@/object/controller/controller';
 import { CloneableSong } from '@/object/song';
 import { ManagerTab } from '@/storage/wrapper';
@@ -22,6 +23,26 @@ interface ContentCommunications {
 	getTabId: {
 		payload: undefined;
 		response: number | undefined;
+	};
+	showNowPlaying: {
+		payload: {
+			song: CloneableSong;
+			connector: ConnectorMeta;
+		};
+		response: void;
+	};
+	clearNowPlaying: {
+		payload: {
+			song: CloneableSong;
+		};
+		response: void;
+	};
+	showSongNotRecognized: {
+		payload: {
+			song: CloneableSong;
+			connector: ConnectorMeta;
+		};
+		response: void;
 	};
 }
 

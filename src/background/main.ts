@@ -13,6 +13,13 @@ import { fetchTab, filterInactiveTabs, getCurrentTab } from './util';
 import { ControllerModeStr } from '@/object/controller/controller';
 import { CloneableSong } from '@/object/song';
 import { t } from '@/util/i18n';
+import {
+	clearNowPlaying,
+	showNowPlaying,
+	showSongNotRecognized,
+} from '@/util/notifications';
+import ClonedSong from '@/object/cloned-song';
+import { openTab } from '@/util/util-browser';
 
 const contextMenus = {
 	ENABLE_CONNECTOR: 'enableConnector',
@@ -156,6 +163,36 @@ setupBackgroundListeners(
 			console.log('getting tab id');
 			console.log(payload, sender.tab?.id);
 			return sender.tab?.id;
+		},
+	}),
+	backgroundListener({
+		type: 'showNowPlaying',
+		fn: (payload, sender) => {
+			showNowPlaying(
+				new ClonedSong(payload.song, sender.tab?.id ?? -1),
+				payload.connector,
+				() => {
+					openTab(sender.tab?.id ?? -1);
+				}
+			);
+		},
+	}),
+	backgroundListener({
+		type: 'clearNowPlaying',
+		fn: (payload, sender) => {
+			clearNowPlaying(new ClonedSong(payload.song, sender.tab?.id ?? -1));
+		},
+	}),
+	backgroundListener({
+		type: 'showSongNotRecognized',
+		fn: (payload, sender) => {
+			showSongNotRecognized(
+				new ClonedSong(payload.song, sender.tab?.id ?? -1),
+				payload.connector,
+				() => {
+					openTab(sender.tab?.id ?? -1);
+				}
+			);
 		},
 	})
 );
