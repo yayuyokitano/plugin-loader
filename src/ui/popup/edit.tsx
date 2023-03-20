@@ -5,7 +5,7 @@ import { ManagerTab } from '@/storage/wrapper';
 import browser from 'webextension-polyfill';
 import ClonedSong from '@/object/cloned-song';
 import Check from '@suid/icons-material/CheckOutlined';
-import ChangeCircle from '@suid/icons-material/ChangeCircleOutlined';
+import PublishedWithChanges from '@suid/icons-material/PublishedWithChangesOutlined';
 import { sendBackgroundMessage } from '@/util/communication';
 import savedEdits from '@/storage/saved-edits';
 
@@ -126,8 +126,16 @@ export default function Edit(props: { tab: Resource<ManagerTab> }) {
 								? t('infoSwapUnableTitle')
 								: t('infoSwapTitle')
 						}
+						onClick={() => {
+							saveEdit(tab, clonedSong, {
+								artist: track(),
+								track: artist(),
+								album: album() || null,
+								albumArtist: albumArtist() || null,
+							});
+						}}
 					>
-						<ChangeCircle />
+						<PublishedWithChanges />
 					</button>
 				</div>
 			</div>

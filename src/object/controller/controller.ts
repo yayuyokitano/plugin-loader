@@ -118,6 +118,12 @@ export default class Controller {
 					this.isEditing = isEditing;
 					this.eventEmitter.emit('updateEditStatus', isEditing);
 				},
+			}),
+			contentListener({
+				type: 'resetData',
+				fn: () => {
+					this.resetSongData();
+				},
 			})
 		);
 	}

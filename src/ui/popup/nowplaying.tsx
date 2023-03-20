@@ -17,6 +17,7 @@ import Edit from '@suid/icons-material/EditOutlined';
 import Block from '@suid/icons-material/BlockOutlined';
 import Favorite from '@suid/icons-material/FavoriteOutlined';
 import HeartBroken from '@suid/icons-material/HeartBrokenOutlined';
+import RestartAlt from '@suid/icons-material/RestartAltOutlined';
 import { sendBackgroundMessage } from '@/util/communication';
 import * as ControllerMode from '@/object/controller/controller-mode';
 import EditComponent from './edit';
@@ -94,6 +95,30 @@ export default function NowPlaying(props: { tab: Resource<ManagerTab> }) {
 							>
 								<Edit />
 							</button>
+							<Show when={song()?.flags.isCorrectedByUser}>
+								<button
+									class={styles.controlButton}
+									disabled={
+										tab()?.mode !== ControllerMode.Playing
+									}
+									title={
+										tab()?.mode === ControllerMode.Playing
+											? t('infoRevertTitle')
+											: t('infoRevertUnableTitle')
+									}
+									onClick={() => {
+										sendBackgroundMessage(
+											tab()?.tabId ?? -1,
+											{
+												type: 'resetData',
+												payload: undefined,
+											}
+										);
+									}}
+								>
+									<RestartAlt />
+								</button>
+							</Show>
 							<button
 								class={`${styles.controlButton}${
 									tab()?.mode !== ControllerMode.Scrobbled
