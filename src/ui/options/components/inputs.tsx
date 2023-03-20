@@ -1,9 +1,9 @@
 import { For, Resource, ResourceActions, Show } from 'solid-js';
 import styles from './components.module.scss';
-import * as Options from '@/storage/options';
+import * as Options from '@/core/storage/options';
 import { t } from '@/util/i18n';
-import StorageWrapper from '@/storage/wrapper';
-import * as BrowserStorage from '@/storage/browser-storage';
+import StorageWrapper from '@/core/storage/wrapper';
+import * as BrowserStorage from '@/core/storage/browser-storage';
 import Check from '@suid/icons-material/CheckOutlined';
 import Close from '@suid/icons-material/CloseOutlined';
 import RestartAlt from '@suid/icons-material/RestartAltOutlined';

@@ -2,7 +2,7 @@ import { t } from '@/util/i18n';
 import ScrobbleService, {
 	Scrobbler,
 	ScrobblerLabel,
-} from '@/object/scrobble-service';
+} from '@/core/object/scrobble-service';
 import { ErrorBoundary, For, Show, createResource, onCleanup } from 'solid-js';
 import styles from './components.module.scss';
 import browser from 'webextension-polyfill';

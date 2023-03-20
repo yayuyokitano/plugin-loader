@@ -1,5 +1,5 @@
-import * as BrowserStorage from '@/storage/browser-storage';
-import * as Options from '@/storage/options';
+import * as BrowserStorage from '@/core/storage/browser-storage';
+import * as Options from '@/core/storage/options';
 import { t } from '@/util/i18n';
 import {
 	For,
@@ -17,7 +17,7 @@ import ExpandMore from '@suid/icons-material/ExpandMoreOutlined';
 import Delete from '@suid/icons-material/DeleteOutlined';
 import connectors, { ConnectorMeta } from '@/core/connectors';
 import Add from '@suid/icons-material/AddOutlined';
-import { CustomPatterns } from '@/storage/wrapper';
+import { CustomPatterns } from '@/core/storage/wrapper';
 import {
 	Checkbox,
 	ConnectorOptionEntry,

@@ -5,8 +5,8 @@
 
 import Reactor from '@/core/content/reactor';
 import BaseConnector from './connector';
-import * as BrowserStorage from '@/storage/browser-storage';
-import { DISABLED_CONNECTORS } from '@/storage/options';
+import * as BrowserStorage from '@/core/storage/browser-storage';
+import { DISABLED_CONNECTORS } from '@/core/storage/options';
 import { sendContentMessage } from '@/util/communication';
 
 export default function start() {

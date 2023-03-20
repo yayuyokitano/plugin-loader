@@ -1,7 +1,7 @@
 import connectors, { ConnectorMeta } from '@/core/connectors';
 import { test } from '@/util/url-match';
 
-import { getAllPatterns } from '@/storage/custom-patterns';
+import { getAllPatterns } from '@/core/storage/custom-patterns';
 
 export async function getConnectorByUrl(
 	url: string

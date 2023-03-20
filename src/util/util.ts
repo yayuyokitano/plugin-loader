@@ -4,12 +4,12 @@ import {
 	ConnectorsOverrideOptionValues,
 	GlobalOptions,
 	SavedEdit,
-} from '@/storage/options';
+} from '@/core/storage/options';
 import {
 	ListenBrainzModel,
 	Properties,
 	StateManagement,
-} from '@/storage/wrapper';
+} from '@/core/storage/wrapper';
 
 /**
  * Module that contains some useful helper functions for background scripts.

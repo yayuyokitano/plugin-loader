@@ -8,9 +8,9 @@ import {
 	createMemo,
 	createSignal,
 } from 'solid-js';
-import { ManagerTab } from '@/storage/wrapper';
+import { ManagerTab } from '@/core/storage/wrapper';
 import browser from 'webextension-polyfill';
-import ClonedSong from '@/object/cloned-song';
+import ClonedSong from '@/core/object/cloned-song';
 import Base from './base';
 import { LastFMIcon } from '@/util/icons';
 import Edit from '@suid/icons-material/EditOutlined';
@@ -19,7 +19,7 @@ import Favorite from '@suid/icons-material/FavoriteOutlined';
 import HeartBroken from '@suid/icons-material/HeartBrokenOutlined';
 import RestartAlt from '@suid/icons-material/RestartAltOutlined';
 import { sendBackgroundMessage } from '@/util/communication';
-import * as ControllerMode from '@/object/controller/controller-mode';
+import * as ControllerMode from '@/core/object/controller/controller-mode';
 import EditComponent from './edit';
 
 export default function NowPlaying(props: { tab: Resource<ManagerTab> }) {

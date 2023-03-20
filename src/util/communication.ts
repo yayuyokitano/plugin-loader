@@ -1,7 +1,7 @@
 import { ConnectorMeta } from '@/core/connectors';
-import { ControllerModeStr } from '@/object/controller/controller';
-import { CloneableSong } from '@/object/song';
-import { ManagerTab } from '@/storage/wrapper';
+import { ControllerModeStr } from '@/core/object/controller/controller';
+import { CloneableSong } from '@/core/object/song';
+import { ManagerTab } from '@/core/storage/wrapper';
 import browser from 'webextension-polyfill';
 
 interface PopupCommunications {

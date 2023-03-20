@@ -4,7 +4,7 @@ import * as Util from '@/core/content/util';
 import * as MetadataFilter from 'metadata-filter';
 import start from '@/core/content/starter';
 import browser from 'webextension-polyfill';
-import scrobbleService from '@/object/scrobble-service';
+import scrobbleService from '@/core/object/scrobble-service';
 
 main();
 

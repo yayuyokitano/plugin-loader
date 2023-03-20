@@ -1,13 +1,13 @@
 import { render } from 'solid-js/web';
 import './popup.module.scss';
 import Unsupported from './unsupported';
-import * as ControllerMode from '@/object/controller/controller-mode';
+import * as ControllerMode from '@/core/object/controller/controller-mode';
 import { initializeThemes } from '@/theme/themes';
 import '@/theme/themes.scss';
 import { Match, Switch, createResource } from 'solid-js';
 import { popupListener, setupPopupListeners } from '@/util/communication';
 import Base from './base';
-import { getCurrentTab } from '@/background/util';
+import { getCurrentTab } from '@/core/background/util';
 import Disabled from './disabled';
 import Err from './err';
 import NowPlaying from './nowplaying';

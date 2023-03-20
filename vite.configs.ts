@@ -39,7 +39,7 @@ export const buildBackground: UserConfig = {
 		outDir: resolve(distRoot(), 'background'),
 		emptyOutDir: true,
 		lib: {
-			entry: resolve(root, 'background', 'main.ts'),
+			entry: resolve(root, 'core', 'background', 'main.ts'),
 			name: manifests.common.name,
 			formats: ['iife'],
 		},

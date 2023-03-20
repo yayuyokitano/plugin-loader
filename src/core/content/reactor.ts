@@ -1,6 +1,6 @@
 import BaseConnector from '@/core/content/connector';
 import { State } from '@/core/types';
-import Controller from '@/object/controller/controller';
+import Controller from '@/core/object/controller/controller';
 
 /**
  * Reactor object reacts to changes in supplied connector

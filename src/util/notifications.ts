@@ -1,10 +1,10 @@
-import Song, { BaseSong } from '@/object/song';
+import Song, { BaseSong } from '@/core/object/song';
 
 import { i18n, notifications, runtime } from 'webextension-polyfill';
 import { getPlatformName, isFullscreenMode } from '@/util/util-browser';
-import * as Options from '@/storage/options';
+import * as Options from '@/core/storage/options';
 import { ConnectorMeta } from '@/core/connectors';
-import { Scrobbler } from '@/object/scrobble-service';
+import { Scrobbler } from '@/core/object/scrobble-service';
 
 const manifest = runtime.getManifest();
 const DEFAULT_OPTIONS_VALUES: {

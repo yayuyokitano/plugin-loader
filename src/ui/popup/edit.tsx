@@ -1,13 +1,13 @@
 import { t } from '@/util/i18n';
 import styles from './popup.module.scss';
 import { Resource, createSignal, onCleanup } from 'solid-js';
-import { ManagerTab } from '@/storage/wrapper';
+import { ManagerTab } from '@/core/storage/wrapper';
 import browser from 'webextension-polyfill';
-import ClonedSong from '@/object/cloned-song';
+import ClonedSong from '@/core/object/cloned-song';
 import Check from '@suid/icons-material/CheckOutlined';
 import PublishedWithChanges from '@suid/icons-material/PublishedWithChangesOutlined';
 import { sendBackgroundMessage } from '@/util/communication';
-import savedEdits from '@/storage/saved-edits';
+import savedEdits from '@/core/storage/saved-edits';
 
 export default function Edit(props: { tab: Resource<ManagerTab> }) {
 	const { tab } = props;

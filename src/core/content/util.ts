@@ -7,11 +7,11 @@ import type {
 	TimeInfo,
 	TrackInfoWithAlbum,
 } from '@/core/types';
-import type { ConnectorOptions } from '@/storage/options';
+import type { ConnectorOptions } from '@/core/storage/options';
 import type { DebugLogType } from '@/util/util';
 
 const BrowserStorage = (async () => {
-	return import('@/storage/browser-storage');
+	return import('@/core/storage/browser-storage');
 })();
 
 type Separator =
