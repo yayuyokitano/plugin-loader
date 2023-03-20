@@ -11,26 +11,34 @@ import {
 import browser from 'webextension-polyfill';
 import { fetchTab, filterInactiveTabs, getCurrentTab } from './util';
 import { ControllerModeStr } from '@/object/controller/controller';
-import Song, { CloneableSong } from '@/object/song';
+import { CloneableSong } from '@/object/song';
 import { t } from '@/util/i18n';
 
 const contextMenus = {
 	ENABLE_CONNECTOR: 'enableConnector',
 	DISABLE_CONNECTOR: 'disableConnector',
+	DISABLE_UNTIL_CLOSED: 'disableUntilClosed',
 };
 
 const state = BrowserStorage.getStorage(BrowserStorage.STATE_MANAGEMENT);
+const disabledTabs = BrowserStorage.getStorage(BrowserStorage.DISABLED_TABS);
 
 browser.runtime.onStartup.addListener(startupFunc);
 browser.runtime.onInstalled.addListener(startupFunc);
 
-browser.tabs.onRemoved.addListener(async () => {
+browser.tabs.onRemoved.addListener(async (tabId) => {
 	const activeTabs = await fetchTab();
 
 	await state.set({
 		activeTabs: await filterInactiveTabs(activeTabs),
 	});
-	void updateAction();
+	updateAction();
+
+	const tabs = await disabledTabs.get();
+	if (tabs?.[tabId]) {
+		delete tabs[tabId];
+		disabledTabs.set(tabs);
+	}
 });
 
 browser.tabs.onUpdated.addListener(async (tabId, _, tab) => {
@@ -57,7 +65,7 @@ browser.tabs.onUpdated.addListener(async (tabId, _, tab) => {
 	await state.set({
 		activeTabs: await filterInactiveTabs(newTabs),
 	});
-	void updateAction();
+	updateAction();
 });
 
 async function updateTab(
@@ -81,7 +89,7 @@ async function updateTab(
 			activeTabs[i] = fn(activeTabs[i]);
 			performedSet = true;
 			await state.set({ activeTabs }, true);
-			void updateAction();
+			updateAction();
 			return;
 		}
 		performedSet = true;
@@ -98,7 +106,7 @@ async function updateTab(
 			},
 			true
 		);
-		void updateAction();
+		updateAction();
 	} catch (err) {
 		if (!performedSet) {
 			state.unlock();
@@ -112,7 +120,7 @@ async function updateMode(tabId: number | undefined, mode: ControllerModeStr) {
 		mode,
 		song: oldTab.song,
 	}));
-	void updateAction();
+	updateAction();
 }
 
 async function updateState(
@@ -130,16 +138,24 @@ setupBackgroundListeners(
 	backgroundListener({
 		type: 'controllerModeChange',
 		fn: (mode, sender) => {
-			void updateMode(sender.tab?.id, mode);
+			updateMode(sender.tab?.id, mode);
 			console.log(`changed mode to ${mode} in tab ${sender.tab?.id}`);
 		},
 	}),
 	backgroundListener({
 		type: 'songUpdate',
 		fn: (song, sender) => {
-			void updateState(sender.tab?.id, song);
+			updateState(sender.tab?.id, song);
 			console.log(`song changed in tab ${sender.tab?.id}`);
 			console.log(song);
+		},
+	}),
+	backgroundListener({
+		type: 'getTabId',
+		fn: (payload, sender) => {
+			console.log('getting tab id');
+			console.log(payload, sender.tab?.id);
+			return sender.tab?.id;
 		},
 	})
 );
@@ -172,10 +188,13 @@ async function updateAction() {
 
 async function updateMenus(tab: ManagerTab) {
 	if (tab.mode === ControllerMode.Unsupported) {
-		void browser.contextMenus.update(contextMenus.ENABLE_CONNECTOR, {
+		browser.contextMenus.update(contextMenus.ENABLE_CONNECTOR, {
 			visible: false,
 		});
-		void browser.contextMenus.update(contextMenus.DISABLE_CONNECTOR, {
+		browser.contextMenus.update(contextMenus.DISABLE_CONNECTOR, {
+			visible: false,
+		});
+		browser.contextMenus.update(contextMenus.DISABLE_UNTIL_CLOSED, {
 			visible: false,
 		});
 		return;
@@ -184,22 +203,29 @@ async function updateMenus(tab: ManagerTab) {
 	const tabData = await browser.tabs.get(tab.tabId);
 	const connector = await getConnectorByUrl(tabData.url ?? '');
 	if (tab.mode === ControllerMode.Disabled) {
-		void browser.contextMenus.update(contextMenus.ENABLE_CONNECTOR, {
+		browser.contextMenus.update(contextMenus.ENABLE_CONNECTOR, {
 			visible: true,
 			title: t('menuEnableConnector', connector?.label),
 		});
-		void browser.contextMenus.update(contextMenus.DISABLE_CONNECTOR, {
+		browser.contextMenus.update(contextMenus.DISABLE_CONNECTOR, {
+			visible: false,
+		});
+		browser.contextMenus.update(contextMenus.DISABLE_UNTIL_CLOSED, {
 			visible: false,
 		});
 		return;
 	}
 
-	void browser.contextMenus.update(contextMenus.ENABLE_CONNECTOR, {
+	browser.contextMenus.update(contextMenus.ENABLE_CONNECTOR, {
 		visible: false,
 	});
-	void browser.contextMenus.update(contextMenus.DISABLE_CONNECTOR, {
+	browser.contextMenus.update(contextMenus.DISABLE_CONNECTOR, {
 		visible: true,
 		title: t('menuDisableConnector', connector?.label),
+	});
+	browser.contextMenus.update(contextMenus.DISABLE_UNTIL_CLOSED, {
+		visible: true,
+		title: t('menuDisableUntilTabClosed', connector?.label),
 	});
 }
 
@@ -207,6 +233,7 @@ function startupFunc() {
 	state.set({
 		activeTabs: [],
 	});
+	disabledTabs.set({});
 
 	browser.contextMenus.create({
 		id: contextMenus.ENABLE_CONNECTOR,
@@ -222,22 +249,37 @@ function startupFunc() {
 		title: 'Error: You should not be seeing this',
 	});
 
+	browser.contextMenus.create({
+		id: contextMenus.DISABLE_UNTIL_CLOSED,
+		visible: false,
+		contexts: ['action'],
+		title: 'Error: You should not be seeing this',
+	});
+
 	browser.contextMenus.onClicked.addListener(async (info) => {
 		const tab = await getCurrentTab();
 
 		switch (info.menuItemId) {
 			case contextMenus.ENABLE_CONNECTOR: {
-				sendBackgroundMessage(tab.tabId ?? -1, {
+				sendBackgroundMessage(tab.tabId, {
 					type: 'setConnectorState',
 					payload: true,
 				});
 				break;
 			}
 			case contextMenus.DISABLE_CONNECTOR: {
-				sendBackgroundMessage(tab.tabId ?? -1, {
+				sendBackgroundMessage(tab.tabId, {
 					type: 'setConnectorState',
 					payload: false,
 				});
+				break;
+			}
+			case contextMenus.DISABLE_UNTIL_CLOSED: {
+				sendBackgroundMessage(tab.tabId, {
+					type: 'disableConnectorUntilTabIsClosed',
+					payload: undefined,
+				});
+				break;
 			}
 		}
 	});

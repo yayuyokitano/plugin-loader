@@ -22,6 +22,7 @@ import {
 	setupContentListeners,
 } from '@/util/communication';
 import EventEmitter from '@/util/emitter';
+import * as BrowserStorage from '@/storage/browser-storage';
 
 /**
  * List of song fields used to check if song is changed. If any of
@@ -51,6 +52,8 @@ type updateEvent = {
 	updateEditStatus: (isEditing: boolean) => void;
 };
 
+const disabledTabs = BrowserStorage.getStorage(BrowserStorage.DISABLED_TABS);
+
 /**
  * Object that handles song playback and scrobbling actions.
  */
@@ -69,6 +72,10 @@ export default class Controller {
 
 	private isEditing = false;
 	private eventEmitter = new EventEmitter<updateEvent>();
+	private tabId = sendContentMessage({
+		type: 'getTabId',
+		payload: undefined,
+	});
 
 	/**
 	 * @param tabId - Tab ID
@@ -130,6 +137,10 @@ export default class Controller {
 				fn: (isEnabled) => {
 					this.setConnectorState(isEnabled);
 				},
+			}),
+			contentListener({
+				type: 'disableConnectorUntilTabIsClosed',
+				fn: () => this.disableUntilTabIsClosed(),
 			})
 		);
 	}
@@ -685,6 +696,22 @@ export default class Controller {
 	setConnectorState(isEnabled: boolean) {
 		this.setEnabled(isEnabled);
 		Options.setConnectorEnabled(this.getConnector(), isEnabled);
+	}
+
+	/**
+	 * Disable connector until tab is closed
+	 */
+	async disableUntilTabIsClosed() {
+		const disabledTabList = await disabledTabs.get();
+		const currentTab = await this.tabId;
+		disabledTabs.set({
+			...disabledTabList,
+			[currentTab ?? -1]: {
+				...(disabledTabList?.[currentTab ?? -1] ?? {}),
+				[this.connector.id]: true,
+			},
+		});
+		this.setEnabled(false);
 	}
 
 	/**

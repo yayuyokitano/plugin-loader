@@ -19,6 +19,10 @@ interface ContentCommunications {
 		payload: CloneableSong | null;
 		response: void;
 	};
+	getTabId: {
+		payload: undefined;
+		response: number | undefined;
+	};
 }
 
 interface BackgroundCommunications {
@@ -52,6 +56,10 @@ interface BackgroundCommunications {
 		payload: boolean;
 		response: void;
 	};
+	disableConnectorUntilTabIsClosed: {
+		payload: undefined;
+		response: void;
+	};
 }
 
 /**
@@ -64,7 +72,6 @@ interface SpecificContentListener<K extends keyof BackgroundCommunications> {
 		payload: BackgroundCommunications[K]['payload'],
 		sender: browser.Runtime.MessageSender
 	) => BackgroundCommunications[K]['response'];
-	sendsResponse?: boolean;
 }
 
 type ContentListener = <R>(
@@ -90,22 +97,19 @@ interface BackgroundMessage<K extends keyof BackgroundCommunications> {
 
 export function setupContentListeners(...listeners: ContentListener[]) {
 	browser.runtime.onMessage.addListener(
-		(message: BackgroundMessage<any>, sender, sendResponse) => {
+		(message: BackgroundMessage<any>, sender) => {
 			let done = false;
 			for (const l of listeners) {
-				if (done) {
-					break;
-				}
-				l((listener) => {
+				const response = l((listener) => {
 					if (message.type !== listener.type) {
 						return;
 					}
 					done = true;
-					if (listener.sendsResponse) {
-						sendResponse();
-					}
-					listener.fn(message.payload, sender);
+					return listener.fn(message.payload, sender);
 				});
+				if (done) {
+					return Promise.resolve(response);
+				}
 			}
 		}
 	);
@@ -130,7 +134,6 @@ interface SpecificBackgroundListener<K extends keyof ContentCommunications> {
 		payload: ContentCommunications[K]['payload'],
 		sender: browser.Runtime.MessageSender
 	) => ContentCommunications[K]['response'];
-	sendsResponse?: boolean;
 }
 
 type BackgroundListener = <R>(
@@ -156,22 +159,19 @@ interface ContentMessage<K extends keyof ContentCommunications> {
 
 export function setupBackgroundListeners(...listeners: BackgroundListener[]) {
 	browser.runtime.onMessage.addListener(
-		(message: ContentMessage<any>, sender, sendResponse) => {
+		(message: ContentMessage<any>, sender) => {
 			let done = false;
 			for (const l of listeners) {
-				if (done) {
-					break;
-				}
-				l((listener) => {
+				const response = l((listener) => {
 					if (message.type !== listener.type) {
 						return;
 					}
 					done = true;
-					if (listener.sendsResponse) {
-						sendResponse();
-					}
-					listener.fn(message.payload, sender);
+					return listener.fn(message.payload, sender);
 				});
+				if (done) {
+					return Promise.resolve(response);
+				}
 			}
 		}
 	);
@@ -193,7 +193,6 @@ interface SpecificPopupListener<K extends keyof PopupCommunications> {
 		payload: PopupCommunications[K]['payload'],
 		sender: browser.Runtime.MessageSender
 	) => PopupCommunications[K]['response'];
-	sendsResponse?: boolean;
 }
 
 type PopupListener = <R>(
@@ -219,22 +218,19 @@ interface PopupMessage<K extends keyof PopupCommunications> {
 
 export function setupPopupListeners(...listeners: PopupListener[]) {
 	browser.runtime.onMessage.addListener(
-		(message: PopupMessage<any>, sender, sendResponse) => {
+		(message: PopupMessage<any>, sender) => {
 			let done = false;
 			for (const l of listeners) {
-				if (done) {
-					break;
-				}
-				l((listener) => {
+				const response = l((listener) => {
 					if (message.type !== listener.type) {
 						return;
 					}
 					done = true;
-					if (listener.sendsResponse) {
-						sendResponse();
-					}
-					listener.fn(message.payload, sender);
+					return listener.fn(message.payload, sender);
 				});
+				if (done) {
+					return Promise.resolve(response);
+				}
 			}
 		}
 	);

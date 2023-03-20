@@ -5,6 +5,7 @@ import {
 	CONNECTORS_OVERRIDE_OPTIONS,
 	CORE,
 	CUSTOM_PATTERNS,
+	DISABLED_TABS,
 	LOCAL_CACHE,
 	NOTIFICATIONS,
 	OPTIONS,
@@ -20,6 +21,7 @@ import {
 import { ControllerModeStr } from '@/object/controller/controller';
 import { CloneableSong } from '@/object/song';
 import EventEmitter from '@/util/emitter';
+import connectors from '@/core/connectors';
 
 export interface CustomPatterns {
 	[connectorId: string]: string[];
@@ -76,6 +78,11 @@ export interface DataModels extends ScrobblerModels {
 
 	/* state management */
 	[STATE_MANAGEMENT]: StateManagement;
+	[DISABLED_TABS]: {
+		[key: number]: {
+			[key in (typeof connectors)[number]['id']]: true;
+		};
+	};
 }
 
 type StorageEvents = {

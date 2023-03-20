@@ -7,6 +7,7 @@ import Reactor from '@/core/content/reactor';
 import BaseConnector from './connector';
 import * as BrowserStorage from '@/storage/browser-storage';
 import { DISABLED_CONNECTORS } from '@/storage/options';
+import { sendContentMessage } from '@/util/communication';
 
 export default function start() {
 	if (window.STARTER_LOADED) {
@@ -35,9 +36,19 @@ function isConnectorInvalid() {
 async function setupStateListening() {
 	const globalOptions = BrowserStorage.getStorage(BrowserStorage.OPTIONS);
 	const options = await globalOptions.get();
+	const disabledTabs = BrowserStorage.getStorage(
+		BrowserStorage.DISABLED_TABS
+	);
+	const disabledTabList = await disabledTabs.get();
+	const currentTab = await sendContentMessage({
+		type: 'getTabId',
+		payload: undefined,
+	});
 	new Reactor(
 		Connector,
-		options === null || !options[DISABLED_CONNECTORS][Connector.meta.id]
+		!disabledTabList?.[currentTab ?? -2]?.[Connector.meta.id] &&
+			(options === null ||
+				!options[DISABLED_CONNECTORS][Connector.meta.id])
 	);
 
 	if (Connector.playerSelector === null) {
