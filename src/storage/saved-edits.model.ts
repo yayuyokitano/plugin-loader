@@ -2,7 +2,7 @@
  * A model to load/save song info to a storage.
  */
 import MD5 from 'blueimp-md5';
-import Song from '@/object/song';
+import Song, { BaseSong } from '@/object/song';
 import { CustomStorage } from '@/storage/custom-storage';
 import { DataModels } from '@/storage/wrapper';
 import { LOCAL_CACHE } from '@/storage/browser-storage';
@@ -56,7 +56,7 @@ export default abstract class SavedEditsModel extends CustomStorage<K> {
 	 * @param song - Song instance
 	 * @param dataToSave - User data
 	 */
-	async saveSongInfo(song: Song, dataToSave: SavedEdit): Promise<void> {
+	async saveSongInfo(song: BaseSong, dataToSave: SavedEdit): Promise<void> {
 		const songId = SavedEditsModel.getSongId(song);
 		const storageData = await this.getSongInfoStorage();
 		if (storageData === null) {
@@ -150,7 +150,7 @@ export default abstract class SavedEditsModel extends CustomStorage<K> {
 	 *
 	 * @returns Song unique ID
 	 */
-	static getSongId(song: Song): string {
+	static getSongId(song: BaseSong): string {
 		const uniqueId = song.getUniqueId();
 		if (uniqueId) {
 			return uniqueId;
@@ -168,7 +168,7 @@ export default abstract class SavedEditsModel extends CustomStorage<K> {
 	 * @returns Generated unique ID
 	 */
 	static makeSongId(
-		song: Song,
+		song: BaseSong,
 		properties: (keyof Song['parsed'])[]
 	): string {
 		let inputStr = '';

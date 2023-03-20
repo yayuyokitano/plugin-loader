@@ -11,6 +11,7 @@ import { getCurrentTab } from '@/background/util';
 import Disabled from './disabled';
 import Err from './err';
 import NowPlaying from './nowplaying';
+import Edit from './edit';
 
 function Popup() {
 	const [tab, setTab] = createResource(getCurrentTab);
@@ -43,6 +44,9 @@ function Popup() {
 				}
 			>
 				<NowPlaying tab={tab} />
+			</Match>
+			<Match when={tab()?.mode === ControllerMode.Unknown}>
+				<Edit tab={tab} />
 			</Match>
 			<Match when={tab()?.mode === ControllerMode.Unsupported}>
 				<Unsupported />

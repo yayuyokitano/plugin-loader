@@ -21,6 +21,7 @@ import {
 	sendContentMessage,
 	setupContentListeners,
 } from '@/util/communication';
+import EventEmitter from '@/util/emitter';
 
 /**
  * List of song fields used to check if song is changed. If any of
@@ -46,6 +47,10 @@ export const controllerModePriority: ControllerModeStr[][] = [
 	[ControllerMode.Skipped, ControllerMode.Disabled],
 ];
 
+type updateEvent = {
+	updateEditStatus: (isEditing: boolean) => void;
+};
+
 /**
  * Object that handles song playback and scrobbling actions.
  */
@@ -61,6 +66,9 @@ export default class Controller {
 	private currentSong: Song | null = null;
 	private isReplayingSong = false;
 	private shouldScrobblePodcasts = true;
+
+	private isEditing = false;
+	private eventEmitter = new EventEmitter<updateEvent>();
 
 	/**
 	 * @param tabId - Tab ID
@@ -96,6 +104,19 @@ export default class Controller {
 				type: 'toggleLove',
 				fn: ({ isLoved }) => {
 					this.toggleLove(isLoved);
+				},
+			}),
+			contentListener({
+				type: 'reprocessSong',
+				fn: () => {
+					this.reprocessSong();
+				},
+			}),
+			contentListener({
+				type: 'setEditState',
+				fn: (isEditing) => {
+					this.isEditing = isEditing;
+					this.eventEmitter.emit('updateEditStatus', isEditing);
 				},
 			})
 		);
@@ -232,6 +253,16 @@ export default class Controller {
 		}
 
 		await SavedEdits.saveSongInfo(this.currentSong, data);
+
+		this.unprocessSong();
+		void this.processSong();
+	}
+
+	async reprocessSong(): Promise<void> {
+		this.assertSongIsPlaying();
+		if (!assertSongNotNull(this.currentSong)) {
+			return;
+		}
 
 		this.unprocessSong();
 		void this.processSong();
@@ -643,6 +674,20 @@ export default class Controller {
 		if (!assertSongNotNull(this.currentSong)) {
 			return;
 		}
+
+		// dont scrobble until user stopped editing.
+		if (this.isEditing) {
+			await new Promise((resolve) => {
+				const eventHandler = (isEditing: boolean) => {
+					if (!isEditing) {
+						this.eventEmitter.off('updateEditStatus', eventHandler);
+						resolve(true);
+					}
+				};
+				this.eventEmitter.on('updateEditStatus', eventHandler);
+			});
+		}
+
 		const results = await ScrobbleService.scrobble(this.currentSong);
 		if (isAnyResult(results, ServiceCallResult.RESULT_OK)) {
 			this.debugLog('Scrobbled successfully');

@@ -40,6 +40,14 @@ interface BackgroundCommunications {
 		payload: undefined;
 		response: void;
 	};
+	reprocessSong: {
+		payload: undefined;
+		response: void;
+	};
+	setEditState: {
+		payload: boolean;
+		response: void;
+	};
 }
 
 /**

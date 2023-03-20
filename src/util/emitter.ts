@@ -15,7 +15,7 @@ export default class EventEmitter<
 		);
 	}
 
-	emit<K extends keyof T>(event: K, args: Parameters<T[K]>) {
+	emit<K extends keyof T>(event: K, ...args: Parameters<T[K]>) {
 		for (const e of this.events.get(event) || []) {
 			e(...args);
 		}
